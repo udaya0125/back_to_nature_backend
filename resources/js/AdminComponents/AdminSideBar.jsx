@@ -209,16 +209,16 @@ const AdminSideBar = ({
 
                     {/* Tour Link */}
                     <Link
-                        href="/tour"
+                        href="/tours"
                         className={`
                             flex items-center rounded-lg transition-colors duration-200 group relative
                             ${isCollapsed ? "p-3 justify-center" : "p-3"}
-                            ${isActive("/tour") ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                            ${isActive("/tours") ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                         `}
                         title={isCollapsed ? "Tour" : ""}
                     >
                         <Map
-                            className={`w-5 h-5 ${isActive("/tour") ? "text-blue-600" : "text-gray-500 group-hover:text-blue-600"}`}
+                            className={`w-5 h-5 ${isActive("/tours") ? "text-blue-600" : "text-gray-500 group-hover:text-blue-600"}`}
                         />
 
                         {!isCollapsed && (
@@ -261,29 +261,29 @@ const AdminSideBar = ({
                         )}
                     </Link>
 
-                    {/* Activity Link */}
+                    {/* Activities Link */}
                     <Link
-                        href="/activity"
+                        href="/activities"
                         className={`
                             flex items-center rounded-lg transition-colors duration-200 group relative
                             ${isCollapsed ? "p-3 justify-center" : "p-3"}
-                            ${isActive("/activity") ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                            ${isActive("/activities") ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                         `}
-                        title={isCollapsed ? "Activity" : ""}
+                        title={isCollapsed ? "Activities" : ""}
                     >
                         <Footprints
-                            className={`w-5 h-5 ${isActive("/activity") ? "text-blue-600" : "text-gray-500 group-hover:text-blue-600"}`}
+                            className={`w-5 h-5 ${isActive("/activities") ? "text-blue-600" : "text-gray-500 group-hover:text-blue-600"}`}
                         />
 
                         {!isCollapsed && (
                             <span className="ml-3 font-medium whitespace-nowrap">
-                                Activity
+                                Activities
                             </span>
                         )}
 
                         {isCollapsed && (
                             <div className="absolute left-full ml-2 px-2 py-1 text-sm bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                                Activity
+                                Activities
                             </div>
                         )}
                     </Link>
