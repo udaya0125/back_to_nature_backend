@@ -8,6 +8,7 @@ use App\Http\Controllers\ActivityLogsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\ActivitiesController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -82,6 +83,11 @@ Route::middleware('auth')->group(function () {
     Route::get("/activities",function(){
         return Inertia::render("AdminPages/Activities");
     });
+
+    Route::get('/ouractivities', [ActivitiesController::class, 'index'])->name('ouractivities.index');
+    Route::post('/ouractivities', [ActivitiesController::class, 'store'])->name('ouractivities.store');
+    Route::put('/ouractivities/{id}', [ActivitiesController::class, 'update'])->name('ouractivities.update');
+    Route::delete('/ouractivities/{id}', [ActivitiesController::class, 'destroy'])->name('ouractivities.destroy');
 
     // ------------------------------------------------------------------------------
     // Admin User Management Route

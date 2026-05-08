@@ -1,29 +1,37 @@
-import React from "react";
+import React from 'react'
 
-const AddToursForm = () => {
+const AddTrekkingForm = () => {
     const [submitting, setSubmitting] = useState(false);
-    const [categoryForm, setCategoryForm] = useState({
-        name: "",
+    const [trekkingForm, setTrekkingForm] = useState({
+        title: "",
+        category: "",
+        sub_category: "",
+        description: "",
+        images: null,
+        price: "",
+        includes: "",
+        excludes: "",
+        itinerary: "",
     });
     //  Use Effect
     useEffect(() => {
-        if (editingCategory) {
-            setCategoryForm({
-                ...editingCategory,
+        if (editingTrekking) {
+            setTrekkingForm({
+                ...editingTrekking,
                 image: null,
             });
             setShowForm(true);
         } else {
-            setCategoryForm({
+            setTrekkingForm({
                 name: "",
             });
         }
-    }, [editingCategory]);
+    }, [editingTrekking]);
 
-    // Handle Create Category
+    // Handle Create Trekking
     const handleCreate = async (formData) => {
         try {
-            await axios.post(route("ourcategories.store"), formData, {
+            await axios.post(route("ourtrekkings.store"), formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -31,7 +39,7 @@ const AddToursForm = () => {
 
             setReloadTrigger((prev) => !prev);
         } catch (error) {
-            console.log("Error creating category", error);
+            console.log("Error creating trekking", error);
             throw error;
         }
     };
@@ -41,27 +49,27 @@ const AddToursForm = () => {
         e.preventDefault();
         const formData = new FormData();
         // Append all form data except image if it's empty
-        for (const key in categoryForm) {
-            if (categoryForm[key] !== null && categoryForm[key] !== "") {
-                formData.append(key, categoryForm[key]);
+        for (const key in trekkingForm) {
+            if (trekkingForm[key] !== null && trekkingForm[key] !== "") {
+                formData.append(key, trekkingForm[key]);
             }
         }
         try {
             setSubmitting(true);
 
-            if (editingCategory) {
-                // Editing existing category
-                await handleUpdate(formData, editingCategory.id);
+            if (editingTrekking) {
+                // Editing existing trekking
+                await handleUpdate(formData, editingTrekking.id);
             } else {
-                // Creating new category
+                // Creating new trekking
                 await handleCreate(formData);
             }
-            setCategoryForm({
+            setTrekkingForm({
                 name: "",
             });
 
             setShowForm(false);
-            setEditingCategory(null);
+            setEditingTrekking(null);
         } catch (error) {
             console.log("Error saving data", error);
         } finally {
@@ -73,19 +81,19 @@ const AddToursForm = () => {
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
-        setCategoryForm((prev) => ({
+        setTrekkingForm((prev) => ({
             ...prev,
             [name]: type === "file" ? files[0] : value,
         }));
     };
 
-    if (!showForm) return null;
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+     if (!showForm) return null;
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">
-                        Add New Category
+                        Add New Trekking
                     </h2>
                     <button
                         onClick={() => {
@@ -98,7 +106,7 @@ const AddToursForm = () => {
                 </div>
             </div>
         </div>
-    );
-};
+  )
+}
 
-export default AddToursForm;
+export default AddTrekkingForm

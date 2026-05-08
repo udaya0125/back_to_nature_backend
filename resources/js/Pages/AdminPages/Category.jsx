@@ -84,7 +84,7 @@ const Category = () => {
                 Header: "Actions",
                 accessor: "actions",
                 Cell: ({ row }) => (
-                    <div className="flex justify-end gap-2">
+                    <div className="flex gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
                             className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
