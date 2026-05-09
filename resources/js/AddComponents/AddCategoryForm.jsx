@@ -29,17 +29,17 @@ const AddCategoryForm = ({
     };
 
     const handleCreate = async (formData) => {
-    try {
-        await axios.post(route("ourcategories.store"), formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
-        setReloadTrigger((prev) => !prev);
-    } catch (error) {
-        // This shows the actual Laravel validation/server error
-        console.error("Server error:", error.response?.data);
-        throw error;
-    }
-};
+        try {
+            await axios.post(route("ourcategories.store"), formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            setReloadTrigger((prev) => !prev);
+        } catch (error) {
+            // This shows the actual Laravel validation/server error
+            console.error("Server error:", error.response?.data);
+            throw error;
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -127,8 +127,8 @@ const AddCategoryForm = ({
                             {submitting
                                 ? "Saving..."
                                 : editingCategory
-                                ? "Update"
-                                : "Create"}
+                                  ? "Update"
+                                  : "Create"}
                         </button>
                     </div>
                 </form>
@@ -138,7 +138,6 @@ const AddCategoryForm = ({
 };
 
 export default AddCategoryForm;
-
 
 // import axios from "axios";
 // import { X } from "lucide-react";
