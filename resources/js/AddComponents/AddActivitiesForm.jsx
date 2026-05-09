@@ -43,7 +43,7 @@ const AddActivitiesForm = ({
                     day: it.day,
                     title: it.title,
                     description: it.description,
-                })) || []
+                })) || [],
             );
             setSelectedImages([]);
         } else {
@@ -57,7 +57,7 @@ const AddActivitiesForm = ({
     useEffect(() => {
         if (activitiesForm.category_id && allCategory?.length) {
             const found = allCategory.find(
-                (cat) => String(cat.id) === String(activitiesForm.category_id)
+                (cat) => String(cat.id) === String(activitiesForm.category_id),
             );
             setSubCategories(found?.sub_categories || []);
         } else {
@@ -90,13 +90,13 @@ const AddActivitiesForm = ({
         setItineraries((prev) =>
             prev
                 .filter((_, i) => i !== index)
-                .map((it, i) => ({ ...it, day: i + 1 }))
+                .map((it, i) => ({ ...it, day: i + 1 })),
         );
     };
 
     const handleItineraryChange = (index, field, value) => {
         setItineraries((prev) =>
-            prev.map((it, i) => (i === index ? { ...it, [field]: value } : it))
+            prev.map((it, i) => (i === index ? { ...it, [field]: value } : it)),
         );
     };
 
@@ -118,7 +118,10 @@ const AddActivitiesForm = ({
         itineraries.forEach((it, index) => {
             formData.append(`itineraries[${index}][day]`, it.day);
             formData.append(`itineraries[${index}][title]`, it.title);
-            formData.append(`itineraries[${index}][description]`, it.description);
+            formData.append(
+                `itineraries[${index}][description]`,
+                it.description,
+            );
         });
 
         return formData;
@@ -149,22 +152,21 @@ const AddActivitiesForm = ({
             setShowForm(false);
             setEditingActivity(null);
         } catch (error) {
-    console.error("Error saving activity:", error);
-    const responseData = error.response?.data;
-    console.log("Error response data:", responseData);
-    let msg = "Something went wrong. Please try again.";
-    if (responseData?.errors) {
-        msg = Object.values(responseData.errors).flat().join(", ");
-    } else if (responseData?.message) {
-        msg = responseData.message;
-    }
+            console.error("Error saving activity:", error);
+            const responseData = error.response?.data;
+            console.log("Error response data:", responseData);
+            let msg = "Something went wrong. Please try again.";
+            if (responseData?.errors) {
+                msg = Object.values(responseData.errors).flat().join(", ");
+            } else if (responseData?.message) {
+                msg = responseData.message;
+            }
 
-    setServerError(msg);
-} finally {
+            setServerError(msg);
+        } finally {
             setSubmitting(false);
         }
     };
-
 
     const handleClose = () => {
         setShowForm(false);
@@ -241,7 +243,8 @@ const AddActivitiesForm = ({
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Sub Category <span className="text-red-500">*</span>
+                                Sub Category{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <select
                                 name="sub_category_id"
@@ -330,7 +333,9 @@ const AddActivitiesForm = ({
                                         />
                                         <button
                                             type="button"
-                                            onClick={() => removeSelectedImage(index)}
+                                            onClick={() =>
+                                                removeSelectedImage(index)
+                                            }
                                             className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition"
                                         >
                                             <X size={12} />
@@ -342,7 +347,8 @@ const AddActivitiesForm = ({
                         {editingActivity?.images?.length > 0 && (
                             <div className="mt-2">
                                 <p className="text-xs text-gray-500 mb-1">
-                                    Existing images (adding new images won't remove these):
+                                    Existing images (adding new images won't
+                                    remove these):
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     {editingActivity.images.map((img) => (
@@ -392,7 +398,9 @@ const AddActivitiesForm = ({
                                         </span>
                                         <button
                                             type="button"
-                                            onClick={() => removeItinerary(index)}
+                                            onClick={() =>
+                                                removeItinerary(index)
+                                            }
                                             className="text-red-400 hover:text-red-600 transition"
                                         >
                                             <Trash2 size={16} />
@@ -403,7 +411,11 @@ const AddActivitiesForm = ({
                                             type="text"
                                             value={it.title}
                                             onChange={(e) =>
-                                                handleItineraryChange(index, "title", e.target.value)
+                                                handleItineraryChange(
+                                                    index,
+                                                    "title",
+                                                    e.target.value,
+                                                )
                                             }
                                             required
                                             placeholder="Day title"
@@ -412,7 +424,11 @@ const AddActivitiesForm = ({
                                         <textarea
                                             value={it.description}
                                             onChange={(e) =>
-                                                handleItineraryChange(index, "description", e.target.value)
+                                                handleItineraryChange(
+                                                    index,
+                                                    "description",
+                                                    e.target.value,
+                                                )
                                             }
                                             required
                                             rows={2}
@@ -442,8 +458,8 @@ const AddActivitiesForm = ({
                             {submitting
                                 ? "Saving..."
                                 : editingActivity
-                                ? "Update Activity"
-                                : "Create Activity"}
+                                  ? "Update Activity"
+                                  : "Create Activity"}
                         </button>
                     </div>
                 </form>
@@ -453,7 +469,6 @@ const AddActivitiesForm = ({
 };
 
 export default AddActivitiesForm;
-
 
 // import React from 'react'
 
@@ -467,7 +482,7 @@ export default AddActivitiesForm;
 //          include: "",
 //          excludes: "",
 //             image: null,
-            
+
 //     });
 //     //  Use Effect
 //     useEffect(() => {
