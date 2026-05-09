@@ -64,15 +64,15 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
             const formData = new FormData();
             formData.append("name", data.name);
             formData.append("email", data.email);
-            
+
             if (data.role) {
                 formData.append("role", data.role.value);
             }
-            
+
             if (data.password) {
                 formData.append("password", data.password);
             }
-            
+
             if (imageFile) {
                 formData.append("image", imageFile);
             }
@@ -139,7 +139,9 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
                             <input
                                 type="text"
                                 id="name"
-                                {...register("name", { required: "Name is required" })}
+                                {...register("name", {
+                                    required: "Name is required",
+                                })}
                                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                                     errors.name
                                         ? "border-red-500"
@@ -171,12 +173,12 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
                             <input
                                 type="email"
                                 id="email"
-                                {...register("email", { 
+                                {...register("email", {
                                     required: "Email is required",
                                     pattern: {
                                         value: /^\S+@\S+$/i,
-                                        message: "Invalid email address"
-                                    }
+                                        message: "Invalid email address",
+                                    },
                                 })}
                                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                                     errors.email
@@ -209,12 +211,13 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 id="password"
-                                {...register("password", { 
+                                {...register("password", {
                                     required: "Password is required",
                                     minLength: {
                                         value: 6,
-                                        message: "Password must be at least 6 characters"
-                                    }
+                                        message:
+                                            "Password must be at least 6 characters",
+                                    },
                                 })}
                                 className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                                     errors.password
@@ -229,7 +232,11 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                             >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                {showPassword ? (
+                                    <EyeOff size={20} />
+                                ) : (
+                                    <Eye size={20} />
+                                )}
                             </button>
                         </div>
                         {errors.password && (
@@ -262,8 +269,8 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
                                             borderColor: state.isFocused
                                                 ? "#3b82f6"
                                                 : errors.role
-                                                ? "#ef4444"
-                                                : "#d1d5db",
+                                                  ? "#ef4444"
+                                                  : "#d1d5db",
                                             boxShadow: state.isFocused
                                                 ? "0 0 0 1px #3b82f6"
                                                 : "none",
@@ -271,10 +278,10 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
                                                 borderColor: state.isFocused
                                                     ? "#3b82f6"
                                                     : errors.role
-                                                    ? "#ef4444"
-                                                    : "#d1d5db",
+                                                      ? "#ef4444"
+                                                      : "#d1d5db",
                                             },
-                                            minHeight: "50px"
+                                            minHeight: "50px",
                                         }),
                                     }}
                                 />
@@ -289,7 +296,10 @@ const AddUserForm = ({ showForm, setShowForm, onClose, onUserAdded }) => {
 
                     {/* Image Upload */}
                     <div>
-                        <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label
+                            htmlFor="image"
+                            className="block text-sm font-medium text-gray-700 mb-2"
+                        >
                             Profile Image
                         </label>
                         <input
