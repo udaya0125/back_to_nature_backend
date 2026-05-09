@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 const AddTrekkingForm = () => {
     const [submitting, setSubmitting] = useState(false);
@@ -87,9 +87,9 @@ const AddTrekkingForm = () => {
         }));
     };
 
-     if (!showForm) return null;
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    if (!showForm) return null;
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">
@@ -106,7 +106,7 @@ const AddTrekkingForm = () => {
                 </div>
             </div>
         </div>
-  )
-}
+    );
+};
 
-export default AddTrekkingForm
+export default AddTrekkingForm;
