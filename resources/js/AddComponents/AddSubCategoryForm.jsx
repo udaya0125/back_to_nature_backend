@@ -47,10 +47,7 @@ const AddSubCategoryForm = ({
         const formData = new FormData();
 
         for (const key in subCategoryForm) {
-            if (
-                subCategoryForm[key] !== null &&
-                subCategoryForm[key] !== ""
-            ) {
+            if (subCategoryForm[key] !== null && subCategoryForm[key] !== "") {
                 formData.append(key, subCategoryForm[key]);
             }
         }
@@ -151,8 +148,8 @@ const AddSubCategoryForm = ({
                             {submitting
                                 ? "Saving..."
                                 : editingSubCategory
-                                ? "Update"
-                                : "Create"}
+                                  ? "Update"
+                                  : "Create"}
                         </button>
                     </div>
                 </form>
@@ -162,7 +159,6 @@ const AddSubCategoryForm = ({
 };
 
 export default AddSubCategoryForm;
-
 
 // import { X } from "lucide-react";
 // import React, { useEffect, useState } from "react";
