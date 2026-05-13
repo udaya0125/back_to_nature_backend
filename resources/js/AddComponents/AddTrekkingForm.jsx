@@ -206,10 +206,10 @@ const AddTrekkingForm = ({
             });
             setExistingImages(editingTrekking.images || []);
             setItineraries(
-                (editingTrekking.itineraries || []).map((i) => ({
-                    day: i.day,
-                    title: i.title,
-                    description: i.description,
+                (editingTrekking.itineraries || []).map((i, idx) => ({
+                    day: i.day || idx + 1,
+                    title: i.title || "",
+                    description: i.description || "",
                 }))
             );
             setNewImages([]);
@@ -404,25 +404,41 @@ const AddTrekkingForm = ({
                 <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
 
                     {/* Title */}
-                    <Field label="Title" required error={errors.title}>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Title <span className="text-red-400 ml-0.5">*</span>
+                        </label>
                         <input
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
                             placeholder="e.g. Everest Base Camp Trek"
-                            className={inputClass(errors.title)}
+                            className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
+                                errors.title
+                                    ? "border-red-400 focus:border-red-400"
+                                    : "border-gray-200 focus:border-indigo-400"
+                            } bg-white placeholder-gray-400`}
                         />
-                    </Field>
+                        {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                    </div>
 
                     {/* Category + Sub-category */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Field label="Category" required error={errors.category_id}>
+                        {/* Category */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                Category <span className="text-red-400 ml-0.5">*</span>
+                            </label>
                             <div className="relative">
                                 <select
                                     name="category_id"
                                     value={formData.category_id}
                                     onChange={handleChange}
-                                    className={selectClass(errors.category_id)}
+                                    className={`w-full appearance-none px-3.5 py-2.5 pr-8 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
+                                        errors.category_id
+                                            ? "border-red-400 focus:border-red-400"
+                                            : "border-gray-200 focus:border-indigo-400"
+                                    } bg-white`}
                                 >
                                     <option value="">Select category</option>
                                     {allCategory.map((cat) => (
@@ -433,16 +449,25 @@ const AddTrekkingForm = ({
                                 </select>
                                 <ChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
-                        </Field>
+                            {errors.category_id && <p className="text-red-500 text-xs mt-1">{errors.category_id}</p>}
+                        </div>
 
-                        <Field label="Sub-category" error={errors.sub_category_id}>
+                        {/* Sub-category */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                Sub-category
+                            </label>
                             <div className="relative">
                                 <select
                                     name="sub_category_id"
                                     value={formData.sub_category_id}
                                     onChange={handleChange}
                                     disabled={subCategories.length === 0}
-                                    className={selectClass(errors.sub_category_id, subCategories.length === 0)}
+                                    className={`w-full appearance-none px-3.5 py-2.5 pr-8 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
+                                        errors.sub_category_id
+                                            ? "border-red-400 focus:border-red-400"
+                                            : "border-gray-200 focus:border-indigo-400"
+                                    } ${subCategories.length === 0 ? "bg-gray-50 text-gray-400 cursor-not-allowed" : "bg-white"}`}
                                 >
                                     <option value="">
                                         {subCategories.length === 0
@@ -457,11 +482,15 @@ const AddTrekkingForm = ({
                                 </select>
                                 <ChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
-                        </Field>
+                            {errors.sub_category_id && <p className="text-red-500 text-xs mt-1">{errors.sub_category_id}</p>}
+                        </div>
                     </div>
 
                     {/* Price */}
-                    <Field label="Price (USD)" error={errors.price}>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Price (USD)
+                        </label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">$</span>
                             <input
@@ -472,45 +501,74 @@ const AddTrekkingForm = ({
                                 value={formData.price}
                                 onChange={handleChange}
                                 placeholder="0.00"
-                                className={`${inputClass(errors.price)} pl-7`}
+                                className={`w-full px-3.5 py-2.5 pl-7 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
+                                    errors.price
+                                        ? "border-red-400 focus:border-red-400"
+                                        : "border-gray-200 focus:border-indigo-400"
+                                } bg-white placeholder-gray-400`}
                             />
                         </div>
-                    </Field>
+                        {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+                    </div>
 
                     {/* Description */}
-                    <Field label="Description" required error={errors.description}>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Description <span className="text-red-400 ml-0.5">*</span>
+                        </label>
                         <textarea
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
                             rows={4}
                             placeholder="Describe this trek…"
-                            className={`${inputClass(errors.description)} resize-none`}
+                            className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 resize-none ${
+                                errors.description
+                                    ? "border-red-400 focus:border-red-400"
+                                    : "border-gray-200 focus:border-indigo-400"
+                            } bg-white placeholder-gray-400`}
                         />
-                    </Field>
+                        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+                    </div>
 
                     {/* Includes / Excludes */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Field label="Includes" error={errors.includes}>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                Includes
+                            </label>
                             <textarea
                                 name="includes"
                                 value={formData.includes}
                                 onChange={handleChange}
                                 rows={3}
                                 placeholder="What's included…"
-                                className={`${inputClass(errors.includes)} resize-none`}
+                                className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 resize-none ${
+                                    errors.includes
+                                        ? "border-red-400 focus:border-red-400"
+                                        : "border-gray-200 focus:border-indigo-400"
+                                } bg-white placeholder-gray-400`}
                             />
-                        </Field>
-                        <Field label="Excludes" error={errors.excludes}>
+                            {errors.includes && <p className="text-red-500 text-xs mt-1">{errors.includes}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                Excludes
+                            </label>
                             <textarea
                                 name="excludes"
                                 value={formData.excludes}
                                 onChange={handleChange}
                                 rows={3}
                                 placeholder="What's excluded…"
-                                className={`${inputClass(errors.excludes)} resize-none`}
+                                className={`w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 resize-none ${
+                                    errors.excludes
+                                        ? "border-red-400 focus:border-red-400"
+                                        : "border-gray-200 focus:border-indigo-400"
+                                } bg-white placeholder-gray-400`}
                             />
-                        </Field>
+                            {errors.excludes && <p className="text-red-500 text-xs mt-1">{errors.excludes}</p>}
+                        </div>
                     </div>
 
                     {/* ── Images ── */}
@@ -598,54 +656,70 @@ const AddTrekkingForm = ({
                                 No itinerary added yet. Click "Add Day" to start.
                             </p>
                         ) : (
-                            <div className="space-y-3">
-                                {itineraries.map((item, i) => (
+                            <div className="space-y-4">
+                                {itineraries.map((item, index) => (
                                     <div
-                                        key={i}
-                                        className="border border-gray-100 rounded-xl p-4 bg-gray-50/60 relative"
+                                        key={index}
+                                        className="border border-gray-200 rounded-lg p-4 relative"
                                     >
-                                        {/* Day badge */}
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2.5 py-1 rounded-full">
-                                                Day {item.day}
-                                            </span>
+                                        <div className="flex justify-end mb-2">
                                             <button
                                                 type="button"
-                                                onClick={() => removeItineraryRow(i)}
-                                                className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                onClick={() => removeItineraryRow(index)}
+                                                className="text-red-400 hover:text-red-600 transition"
                                             >
-                                                <Trash2 size={14} />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
 
-                                        {/* Title */}
-                                        <input
-                                            value={item.title}
-                                            onChange={(e) =>
-                                                handleItineraryChange(i, "title", e.target.value)
-                                            }
-                                            placeholder="Day title (e.g. Fly to Lukla)"
-                                            className={`${inputClass(errors[`itinerary_title_${i}`])} mb-2`}
-                                        />
-                                        {errors[`itinerary_title_${i}`] && (
-                                            <p className="text-red-500 text-xs mb-2">
-                                                {errors[`itinerary_title_${i}`]}
+                                        {/* Day label and Title input on same row */}
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <span className="font-semibold text-indigo-600 text-sm whitespace-nowrap">
+                                                Day {item.day}:
+                                            </span>
+                                            <div className="flex-1">
+                                                <input
+                                                    type="text"
+                                                    value={item.title}
+                                                    onChange={(e) =>
+                                                        handleItineraryChange(
+                                                            index,
+                                                            "title",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    required
+                                                    placeholder="Day title (e.g. Fly to Lukla)"
+                                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        {errors[`itinerary_title_${index}`] && (
+                                            <p className="text-red-500 text-xs mb-2 -mt-2">
+                                                {errors[`itinerary_title_${index}`]}
                                             </p>
                                         )}
 
-                                        {/* Description */}
-                                        <textarea
-                                            value={item.description}
-                                            onChange={(e) =>
-                                                handleItineraryChange(i, "description", e.target.value)
-                                            }
-                                            placeholder="Describe what happens this day…"
-                                            rows={2}
-                                            className={`${inputClass(errors[`itinerary_desc_${i}`])} resize-none`}
-                                        />
-                                        {errors[`itinerary_desc_${i}`] && (
+                                        {/* Description below */}
+                                        <div>
+                                            <textarea
+                                                value={item.description}
+                                                onChange={(e) =>
+                                                    handleItineraryChange(
+                                                        index,
+                                                        "description",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                required
+                                                rows={2}
+                                                placeholder="Describe what happens this day…"
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                                            />
+                                        </div>
+                                        {errors[`itinerary_desc_${index}`] && (
                                             <p className="text-red-500 text-xs mt-1">
-                                                {errors[`itinerary_desc_${i}`]}
+                                                {errors[`itinerary_desc_${index}`]}
                                             </p>
                                         )}
                                     </div>
@@ -667,7 +741,6 @@ const AddTrekkingForm = ({
                     </button>
                     <button
                         type="submit"
-                        form=""
                         onClick={handleSubmit}
                         disabled={submitting}
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition font-medium text-sm disabled:opacity-60"
@@ -686,32 +759,5 @@ const AddTrekkingForm = ({
         </div>
     );
 };
-
-// ─── Small helpers ─────────────────────────────────────────────────────────────
-
-const Field = ({ label, required, error, children }) => (
-    <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-            {label}
-            {required && <span className="text-red-400 ml-0.5">*</span>}
-        </label>
-        {children}
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-    </div>
-);
-
-const inputClass = (error) =>
-    `w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
-        error
-            ? "border-red-400 focus:border-red-400"
-            : "border-gray-200 focus:border-indigo-400"
-    } bg-white placeholder-gray-400`;
-
-const selectClass = (error, disabled) =>
-    `w-full appearance-none px-3.5 py-2.5 pr-8 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
-        error
-            ? "border-red-400 focus:border-red-400"
-            : "border-gray-200 focus:border-indigo-400"
-    } ${disabled ? "bg-gray-50 text-gray-400 cursor-not-allowed" : "bg-white"}`;
 
 export default AddTrekkingForm;

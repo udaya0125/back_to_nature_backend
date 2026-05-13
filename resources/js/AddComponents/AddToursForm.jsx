@@ -496,7 +496,7 @@ const AddToursForm = ({
                     </section>
 
                     {/* ── Itineraries (Updated Layout) ── */}
-                    <section className="space-y-3">
+                    <section className="space-y-3 border border-gray-200 pt-4">
                         <div className="flex justify-between items-center">
                             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                                 Itineraries
