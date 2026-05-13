@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\ActivitiesController;
 use App\Http\Controllers\TourController;
+use App\Http\Controllers\TrekkingController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
