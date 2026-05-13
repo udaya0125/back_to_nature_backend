@@ -496,7 +496,7 @@ const AddToursForm = ({
                     </section>
 
                     {/* ── Itineraries (Updated Layout) ── */}
-                    <section className="space-y-3 border border-gray-200 pt-4">
+                    <section className="space-y-3 pt-4">
                         <div className="flex justify-between items-center">
                             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                                 Itineraries
@@ -512,7 +512,7 @@ const AddToursForm = ({
                         </div>
 
                         {itineraries.length === 0 && (
-                            <p className="text-sm text-gray-400 italic">
+                            <p className="text-sm text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl">
                                 No itinerary days added yet.
                             </p>
                         )}

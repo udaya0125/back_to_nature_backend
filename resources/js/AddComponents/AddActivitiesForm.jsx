@@ -382,7 +382,7 @@ const AddActivitiesForm = ({
                         </div>
 
                         {itineraries.length === 0 && (
-                            <p className="text-sm text-gray-400 italic">
+                            <p className="text-sm text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl">
                                 No itinerary days added yet.
                             </p>
                         )}
