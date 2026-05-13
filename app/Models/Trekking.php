@@ -9,7 +9,7 @@ class Trekking extends Model
 {
     protected $fillable = [
         'title', 'category_id', 'sub_category_id', 'price',
-        'description', 'includes', 'excludes', 'slug'
+        'description', 'includes', 'excludes', 'slug',
     ];
 
     /**
@@ -23,12 +23,12 @@ class Trekking extends Model
 
         // Before insert — give a temporary unique slug so the row can be saved
         static::creating(function ($trekking) {
-            $trekking->slug = Str::slug($trekking->title) . '-' . uniqid();
+            $trekking->slug = Str::slug($trekking->title).'-'.uniqid();
         });
 
         // After insert — replace with the clean slug that includes the real ID
         static::created(function ($trekking) {
-            $trekking->slug = Str::slug($trekking->title) . '-' . $trekking->id;
+            $trekking->slug = Str::slug($trekking->title).'-'.$trekking->id;
             $trekking->saveQuietly();
         });
     }
