@@ -91,10 +91,11 @@ class TrekkingController extends Controller
             }
         }
 
-        // Optional Activity Log
-        // ActivityLog::create([
-        //     'activity' => 'Created trekking: ' . $trekking->title
-        // ]);
+        ActivityLog::create([
+            'name' => auth()->user()->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title' => 'Created trekking: ' . $trekking->title,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -109,6 +110,7 @@ class TrekkingController extends Controller
     public function update(Request $request, $id)
     {
         $trekking = Trekking::findOrFail($id);
+        $oldTitle = $trekking->title;
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -172,10 +174,11 @@ class TrekkingController extends Controller
             }
         }
 
-        // Optional Activity Log
-        // ActivityLog::create([
-        //     'activity' => 'Updated trekking: ' . $trekking->title
-        // ]);
+        ActivityLog::create([
+            'name' => auth()->user()->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title' => 'Updated trekking: "' . $oldTitle . '" -> "' . $trekking->title . '"',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -190,6 +193,7 @@ class TrekkingController extends Controller
     public function destroy($id)
     {
         $trekking = Trekking::with(['images', 'itineraries'])->findOrFail($id);
+        $trekkingTitle = $trekking->title;
 
         /**
          * Delete Images from storage
@@ -208,10 +212,11 @@ class TrekkingController extends Controller
         // Delete trekking
         $trekking->delete();
 
-        // Optional Activity Log
-        // ActivityLog::create([
-        //     'activity' => 'Deleted trekking: ' . $trekking->title
-        // ]);
+        ActivityLog::create([
+            'name' => auth()->user()->name ?? 'System',
+            'ip_address' => request()->ip(),
+            'title' => 'Deleted trekking: ' . $trekkingTitle,
+        ]);
 
         return response()->json([
             'success' => true,

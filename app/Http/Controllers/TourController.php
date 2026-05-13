@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tour;
 use App\Models\TourImage;
 use App\Models\TourItinerary;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -96,6 +97,12 @@ class TourController extends Controller
                 }
             }
 
+            ActivityLog::create([
+                'name' => auth()->user()->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title' => 'Created tour: ' . $tour->title,
+            ]);
+
             DB::commit();
 
             return response()->json([
@@ -143,6 +150,7 @@ class TourController extends Controller
         DB::beginTransaction();
 
         try {
+            $oldTitle = $tour->title;
 
             // Update Tour
             $tour->update([
@@ -189,6 +197,12 @@ class TourController extends Controller
                 }
             }
 
+            ActivityLog::create([
+                'name' => auth()->user()->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title' => 'Updated tour: "' . $oldTitle . '" -> "' . $tour->title . '"',
+            ]);
+
             DB::commit();
 
             return response()->json([
@@ -218,6 +232,7 @@ class TourController extends Controller
         DB::beginTransaction();
 
         try {
+            $tourTitle = $tour->title;
 
             /**
              * Delete Images From Storage
@@ -239,6 +254,12 @@ class TourController extends Controller
              * Delete Tour
              */
             $tour->delete();
+
+            ActivityLog::create([
+                'name' => auth()->user()->name ?? 'System',
+                'ip_address' => request()->ip(),
+                'title' => 'Deleted tour: ' . $tourTitle,
+            ]);
 
             DB::commit();
 

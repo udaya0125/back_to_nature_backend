@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activities;
 use App\Models\ActivityImage;
 use App\Models\ActivityItinerary;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -83,6 +84,12 @@ class ActivitiesController extends Controller
                 }
             }
 
+            ActivityLog::create([
+                'name' => auth()->user()->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title' => 'Created activity: ' . $activity->title,
+            ]);
+
             DB::commit();
 
             return response()->json([
@@ -117,6 +124,8 @@ class ActivitiesController extends Controller
         DB::beginTransaction();
 
         try {
+            $oldTitle = $activity->title;
+
             // Update main activity
             $activity->update([
                 'title' => $request->title,
@@ -158,6 +167,12 @@ class ActivitiesController extends Controller
                 }
             }
 
+            ActivityLog::create([
+                'name' => auth()->user()->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title' => 'Updated activity: "' . $oldTitle . '" -> "' . $activity->title . '"',
+            ]);
+
             DB::commit();
 
             return response()->json([
@@ -186,12 +201,20 @@ class ActivitiesController extends Controller
         DB::beginTransaction();
 
         try {
+            $activityTitle = $activity->title;
+
             // delete related records first
             $activity->images()->delete();
             $activity->itineraries()->delete();
 
             // delete activity
             $activity->delete();
+
+            ActivityLog::create([
+                'name' => auth()->user()->name ?? 'System',
+                'ip_address' => request()->ip(),
+                'title' => 'Deleted activity: ' . $activityTitle,
+            ]);
 
             DB::commit();
 
