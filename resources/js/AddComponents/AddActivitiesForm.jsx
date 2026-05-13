@@ -364,7 +364,8 @@ const AddActivitiesForm = ({
                         )}
                     </div>
 
-                    {/* Itineraries */}
+                    {/* Itineraries - Updated Layout */}
+                    {/* Itineraries - Day and Title on same row */}
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <label className="block text-sm font-medium text-gray-700">
@@ -392,10 +393,7 @@ const AddActivitiesForm = ({
                                     key={index}
                                     className="border border-gray-200 rounded-lg p-4 relative"
                                 >
-                                    <div className="flex justify-between items-center mb-3">
-                                        <span className="font-semibold text-indigo-600 text-sm">
-                                            Day {it.day}
-                                        </span>
+                                    <div className="flex justify-end mb-2">
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -406,21 +404,32 @@ const AddActivitiesForm = ({
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
-                                    <div className="space-y-2">
-                                        <input
-                                            type="text"
-                                            value={it.title}
-                                            onChange={(e) =>
-                                                handleItineraryChange(
-                                                    index,
-                                                    "title",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            required
-                                            placeholder="Day title"
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        />
+
+                                    {/* Day label and Title input on same row */}
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <span className="font-semibold text-indigo-600 text-sm whitespace-nowrap">
+                                            Day {it.day}:
+                                        </span>
+                                        <div className="flex-1">
+                                            <input
+                                                type="text"
+                                                value={it.title}
+                                                onChange={(e) =>
+                                                    handleItineraryChange(
+                                                        index,
+                                                        "title",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                required
+                                                placeholder="Day title"
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Description below */}
+                                    <div>
                                         <textarea
                                             value={it.description}
                                             onChange={(e) =>
