@@ -119,8 +119,7 @@
 // export default AddToursForm;
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { X, Plus, Trash2, ImagePlus, ChevronDown, Loader2 } from "lucide-react";
+import { X, Plus, Trash2, ImagePlus, ChevronDown } from "lucide-react";
 
 const AddToursForm = ({
     editingTour,
@@ -158,11 +157,11 @@ const AddToursForm = ({
                 excludes: editingTour.excludes || "",
             });
             setItineraries(
-                (editingTour.itineraries || []).map((i) => ({
-                    day: i.day,
-                    title: i.title,
-                    description: i.description,
-                }))
+                editingTour.itineraries?.map((i, idx) => ({
+                    day: i.day || idx + 1,
+                    title: i.title || "",
+                    description: i.description || "",
+                })) || []
             );
             setNewImages([]);
             setImagePreviews([]);
@@ -171,13 +170,6 @@ const AddToursForm = ({
             resetForm();
         }
     }, [editingTour]);
-
-    // Clean up blob URLs on unmount
-    useEffect(() => {
-        return () => {
-            imagePreviews.forEach((url) => URL.revokeObjectURL(url));
-        };
-    }, [imagePreviews]);
 
     const resetForm = () => {
         setTourForm(emptyForm);
@@ -191,29 +183,23 @@ const AddToursForm = ({
     const handleChange = (e) => {
         const { name, value } = e.target;
         setTourForm((prev) => ({ ...prev, [name]: value }));
-        // Clear error on change
-        if (validationErrors[name]) {
-            setValidationErrors((prev) => ({ ...prev, [name]: null }));
-        }
     };
 
     // ─── Image handling ───────────────────────────────────────────────────────
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-        if (!files.length) return;
-
         setNewImages((prev) => [...prev, ...files]);
+
         const previews = files.map((f) => URL.createObjectURL(f));
         setImagePreviews((prev) => [...prev, ...previews]);
-
-        // Reset input
-        e.target.value = "";
     };
 
     const removeNewImage = (index) => {
-        URL.revokeObjectURL(imagePreviews[index]);
         setNewImages((prev) => prev.filter((_, i) => i !== index));
-        setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+        setImagePreviews((prev) => {
+            URL.revokeObjectURL(prev[index]);
+            return prev.filter((_, i) => i !== index);
+        });
     };
 
     // ─── Itinerary handling ───────────────────────────────────────────────────
@@ -225,11 +211,11 @@ const AddToursForm = ({
     };
 
     const removeItinerary = (index) => {
-        setItineraries((prev) => {
-            const updated = prev.filter((_, i) => i !== index);
-            // Re-number days
-            return updated.map((item, i) => ({ ...item, day: i + 1 }));
-        });
+        setItineraries((prev) =>
+            prev
+                .filter((_, i) => i !== index)
+                .map((it, i) => ({ ...it, day: i + 1 }))
+        );
     };
 
     const handleItineraryChange = (index, field, value) => {
@@ -238,46 +224,18 @@ const AddToursForm = ({
                 i === index ? { ...item, [field]: value } : item
             )
         );
-        // Clear itinerary-specific errors
-        const errorKey = `itinerary_${field}_${index}`;
-        if (validationErrors[errorKey]) {
-            setValidationErrors((prev) => ({ ...prev, [errorKey]: null }));
-        }
-    };
-
-    // ─── Validation ───────────────────────────────────────────────────────────
-    const validate = () => {
-        const errors = {};
-        
-        if (!tourForm.title.trim()) errors.title = "Title is required.";
-        if (!tourForm.category_id) errors.category_id = "Please select a category.";
-        if (!tourForm.description.trim()) errors.description = "Description is required.";
-        
-        itineraries.forEach((item, i) => {
-            if (!item.title.trim()) {
-                errors[`itinerary_title_${i}`] = "Title is required.";
-            }
-            if (!item.description.trim()) {
-                errors[`itinerary_desc_${i}`] = "Description is required.";
-            }
-        });
-        
-        setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
     };
 
     // ─── Create ───────────────────────────────────────────────────────────────
     const handleCreate = async (formData) => {
-        await axios.post(route("ourtours.store"), formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
+        await axios.post(route("ourtours.store"), formData);
         setReloadTrigger((prev) => !prev);
     };
 
     // ─── Submit ───────────────────────────────────────────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validate()) return;
+        setValidationErrors({});
 
         const formData = new FormData();
 
@@ -288,7 +246,7 @@ const AddToursForm = ({
             }
         });
 
-        // Images
+        // Images — append each file under "images[]"
         newImages.forEach((img) => formData.append("images[]", img));
 
         // Itineraries
@@ -311,11 +269,8 @@ const AddToursForm = ({
         } catch (error) {
             if (error.response?.status === 422) {
                 const errors = error.response.data.errors || {};
-                const mapped = {};
-                Object.entries(errors).forEach(([key, msgs]) => {
-                    mapped[key] = Array.isArray(msgs) ? msgs[0] : msgs;
-                });
-                setValidationErrors(mapped);
+                console.error("Validation errors:", errors);
+                setValidationErrors(errors);
             } else {
                 console.error("Error saving tour:", error);
             }
@@ -336,11 +291,11 @@ const AddToursForm = ({
     const existingImages = editingTour?.images || [];
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-800">
+                <div className="flex justify-between items-center px-6 py-5 border-b border-gray-100">
+                    <h2 className="text-xl font-bold text-gray-900">
                         {editingTour ? "Edit Tour" : "Create New Tour"}
                     </h2>
                     <button
@@ -352,96 +307,148 @@ const AddToursForm = ({
                 </div>
 
                 {/* Scrollable body */}
-                <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
-                    {/* ── Basic Info ── */}
-                    <Field label="Title" required error={validationErrors.title}>
-                        <input
-                            type="text"
-                            name="title"
-                            value={tourForm.title}
-                            onChange={handleChange}
-                            placeholder="e.g. Everest Base Camp Trek"
-                            className={inputClass(validationErrors.title)}
-                        />
-                    </Field>
+                <form
+                    onSubmit={handleSubmit}
+                    className="overflow-y-auto flex-1 px-6 py-5 space-y-6"
+                >
+                    {/* ── Validation error banner ── */}
+                    {Object.keys(validationErrors).length > 0 && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-sm font-semibold text-red-700 mb-1">
+                                Please fix the following errors:
+                            </p>
+                            <ul className="list-disc list-inside space-y-0.5">
+                                {Object.entries(validationErrors).map(([field, messages]) =>
+                                    messages.map((msg, i) => (
+                                        <li key={`${field}-${i}`} className="text-xs text-red-600">
+                                            {msg}
+                                        </li>
+                                    ))
+                                )}
+                            </ul>
+                        </div>
+                    )}
 
-                    {/* Category */}
-                    <Field label="Category" required error={validationErrors.category_id}>
-                        <div className="relative">
-                            <select
-                                name="category_id"
-                                value={tourForm.category_id}
+                    {/* ── Basic Info ── */}
+                    <section className="space-y-4">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                            Basic Info
+                        </h3>
+
+                        {/* Title */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="title"
+                                value={tourForm.title}
                                 onChange={handleChange}
-                                className={selectClass(validationErrors.category_id)}
-                            >
-                                <option value="">Select a category</option>
-                                {allCategory.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown
-                                size={15}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                                required
+                                placeholder="e.g. Everest Base Camp Trek"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             />
                         </div>
-                    </Field>
 
-                    {/* Description */}
-                    <Field label="Description" required error={validationErrors.description}>
-                        <textarea
-                            name="description"
-                            value={tourForm.description}
-                            onChange={handleChange}
-                            rows={4}
-                            placeholder="Describe the tour experience..."
-                            className={`${inputClass(validationErrors.description)} resize-none`}
-                        />
-                    </Field>
+                        {/* Category */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Category <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <select
+                                    name="category_id"
+                                    value={tourForm.category_id}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full appearance-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white pr-8"
+                                >
+                                    <option value="">Select a category</option>
+                                    {allCategory.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown
+                                    size={16}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                                />
+                            </div>
+                        </div>
 
-                    {/* Includes / Excludes */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Field label="Includes" error={validationErrors.includes}>
+                        {/* Description */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Description <span className="text-red-500">*</span>
+                            </label>
                             <textarea
-                                name="includes"
-                                value={tourForm.includes}
+                                name="description"
+                                value={tourForm.description}
                                 onChange={handleChange}
-                                rows={3}
-                                placeholder="What's included..."
-                                className={`${inputClass(validationErrors.includes)} resize-none`}
+                                required
+                                rows={4}
+                                placeholder="Describe the tour experience..."
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                             />
-                        </Field>
-                        <Field label="Excludes" error={validationErrors.excludes}>
-                            <textarea
-                                name="excludes"
-                                value={tourForm.excludes}
-                                onChange={handleChange}
-                                rows={3}
-                                placeholder="What's excluded..."
-                                className={`${inputClass(validationErrors.excludes)} resize-none`}
-                            />
-                        </Field>
-                    </div>
+                        </div>
+
+                        {/* Includes / Excludes */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Includes
+                                </label>
+                                <textarea
+                                    name="includes"
+                                    value={tourForm.includes}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    placeholder="What's included..."
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Excludes
+                                </label>
+                                <textarea
+                                    name="excludes"
+                                    value={tourForm.excludes}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    placeholder="What's excluded..."
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                                />
+                            </div>
+                        </div>
+                    </section>
 
                     {/* ── Images ── */}
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                             Images
-                        </label>
+                        </h3>
 
                         {/* Existing images (edit mode) */}
                         {existingImages.length > 0 && (
-                            <div className="mb-3">
-                                <p className="text-xs text-gray-400 mb-2">Current images</p>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-2">
+                                    Current images
+                                </p>
                                 <div className="flex flex-wrap gap-2">
                                     {existingImages.map((img) => (
-                                        <img
+                                        <div
                                             key={img.id}
-                                            src={`/storage/${img.image}`}
-                                            alt="tour"
-                                            className="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                                        />
+                                            className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200"
+                                        >
+                                            <img
+                                                src={`/storage/${img.image}`}
+                                                alt="tour"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
@@ -449,20 +456,23 @@ const AddToursForm = ({
 
                         {/* New image previews */}
                         {imagePreviews.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-3">
+                            <div className="flex flex-wrap gap-2">
                                 {imagePreviews.map((src, i) => (
-                                    <div key={i} className="relative group">
+                                    <div
+                                        key={i}
+                                        className="relative w-20 h-20 rounded-lg overflow-hidden border border-indigo-200 group"
+                                    >
                                         <img
                                             src={src}
                                             alt={`preview-${i}`}
-                                            className="w-16 h-16 object-cover rounded-lg border border-indigo-200"
+                                            className="w-full h-full object-cover"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => removeNewImage(i)}
-                                            className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
                                         >
-                                            <X size={11} />
+                                            <X size={16} className="text-white" />
                                         </button>
                                     </div>
                                 ))}
@@ -470,8 +480,8 @@ const AddToursForm = ({
                         )}
 
                         {/* Upload button */}
-                        <label className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/40 transition-colors text-sm text-gray-500 w-fit">
-                            <ImagePlus size={17} className="text-indigo-400" />
+                        <label className="flex items-center gap-2 w-fit cursor-pointer border-2 border-dashed border-gray-300 hover:border-indigo-400 text-gray-500 hover:text-indigo-500 rounded-lg px-4 py-2.5 text-sm transition-colors">
+                            <ImagePlus size={18} />
                             <span>
                                 {editingTour ? "Add more images" : "Upload images"}
                             </span>
@@ -483,115 +493,118 @@ const AddToursForm = ({
                                 className="hidden"
                             />
                         </label>
-                        {validationErrors["images.0"] && (
-                            <p className="text-red-500 text-xs mt-1">{validationErrors["images.0"]}</p>
-                        )}
-                    </div>
+                    </section>
 
-                    {/* ── Itinerary Builder ── */}
-                    <div>
-                        <div className="flex items-center justify-between mb-3">
-                            <label className="block text-sm font-semibold text-gray-700">
-                                Itinerary
-                            </label>
+                    {/* ── Itineraries (Updated Layout) ── */}
+                    <section className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                                Itineraries
+                            </h3>
                             <button
                                 type="button"
                                 onClick={addItinerary}
-                                className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition"
+                                className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800 transition"
                             >
-                                <Plus size={13} />
+                                <Plus size={16} />
                                 Add Day
                             </button>
                         </div>
 
-                        {itineraries.length === 0 ? (
-                            <p className="text-sm text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl">
-                                No itinerary added yet. Click "Add Day" to start.
+                        {itineraries.length === 0 && (
+                            <p className="text-sm text-gray-400 italic">
+                                No itinerary days added yet.
                             </p>
-                        ) : (
-                            <div className="space-y-3">
-                                {itineraries.map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className="border border-gray-100 rounded-xl p-4 bg-gray-50/60 relative"
-                                    >
-                                        {/* Day badge */}
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2.5 py-1 rounded-full">
-                                                Day {item.day}
-                                            </span>
-                                            {itineraries.length > 1 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeItinerary(index)}
-                                                    className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            )}
-                                        </div>
+                        )}
 
-                                        {/* Title */}
-                                        <input
-                                            value={item.title}
-                                            onChange={(e) =>
-                                                handleItineraryChange(index, "title", e.target.value)
-                                            }
-                                            placeholder="Day title (e.g. Arrival in Kathmandu)"
-                                            className={`${inputClass(validationErrors[`itinerary_title_${index}`])} mb-2`}
-                                        />
-                                        {validationErrors[`itinerary_title_${index}`] && (
-                                            <p className="text-red-500 text-xs mb-2">
-                                                {validationErrors[`itinerary_title_${index}`]}
-                                            </p>
+                        <div className="space-y-4">
+                            {itineraries.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="border border-gray-200 rounded-lg p-4 relative"
+                                >
+                                    <div className="flex justify-end mb-2">
+                                        {itineraries.length > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeItinerary(index)}
+                                                className="text-red-400 hover:text-red-600 transition"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         )}
+                                    </div>
 
-                                        {/* Description */}
+                                    {/* Day label and Title input on same row */}
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <span className="font-semibold text-indigo-600 text-sm whitespace-nowrap">
+                                            Day {item.day}:
+                                        </span>
+                                        <div className="flex-1">
+                                            <input
+                                                type="text"
+                                                value={item.title}
+                                                onChange={(e) =>
+                                                    handleItineraryChange(
+                                                        index,
+                                                        "title",
+                                                        e.target.value
+                                                    )
+                                                }
+                                                required
+                                                placeholder="Day title"
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Description below */}
+                                    <div>
                                         <textarea
                                             value={item.description}
                                             onChange={(e) =>
-                                                handleItineraryChange(index, "description", e.target.value)
+                                                handleItineraryChange(
+                                                    index,
+                                                    "description",
+                                                    e.target.value
+                                                )
                                             }
-                                            placeholder="Describe what happens on this day..."
+                                            required
                                             rows={2}
-                                            className={`${inputClass(validationErrors[`itinerary_desc_${index}`])} resize-none`}
+                                            placeholder="Day description"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         />
-                                        {validationErrors[`itinerary_desc_${index}`] && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {validationErrors[`itinerary_desc_${index}`]}
-                                            </p>
-                                        )}
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
                 </form>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 rounded-b-2xl">
+                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
                     <button
                         type="button"
                         onClick={handleClose}
-                        disabled={submitting}
-                        className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-100 transition font-medium text-sm disabled:opacity-50"
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        form=""
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition font-medium text-sm disabled:opacity-60"
+                        className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center gap-2"
                     >
                         {submitting ? (
                             <>
-                                <Loader2 size={15} className="animate-spin" />
-                                <span>{editingTour ? "Updating..." : "Creating..."}</span>
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Saving...
                             </>
+                        ) : editingTour ? (
+                            "Update Tour"
                         ) : (
-                            <span>{editingTour ? "Update Tour" : "Create Tour"}</span>
+                            "Create Tour"
                         )}
                     </button>
                 </div>
@@ -599,32 +612,5 @@ const AddToursForm = ({
         </div>
     );
 };
-
-// ─── Helper Components ─────────────────────────────────────────────────────────
-
-const Field = ({ label, required, error, children }) => (
-    <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-            {label}
-            {required && <span className="text-red-400 ml-0.5">*</span>}
-        </label>
-        {children}
-        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-    </div>
-);
-
-const inputClass = (error) =>
-    `w-full px-3.5 py-2.5 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
-        error
-            ? "border-red-400 focus:border-red-400"
-            : "border-gray-200 focus:border-indigo-400"
-    } bg-white placeholder-gray-400`;
-
-const selectClass = (error) =>
-    `w-full appearance-none px-3.5 py-2.5 pr-8 text-sm border rounded-xl outline-none transition-colors focus:ring-2 focus:ring-indigo-300 ${
-        error
-            ? "border-red-400 focus:border-red-400"
-            : "border-gray-200 focus:border-indigo-400"
-    } bg-white`;
 
 export default AddToursForm;
