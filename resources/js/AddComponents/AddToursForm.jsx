@@ -331,9 +331,6 @@ const AddToursForm = ({
 
                     {/* ── Basic Info ── */}
                     <section className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                            Basic Info
-                        </h3>
 
                         {/* Title */}
                         <div>
