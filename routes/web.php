@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\ActivitiesController;
+use App\Http\Controllers\TourController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -67,6 +68,11 @@ Route::middleware('auth')->group(function () {
     Route::get("/tours",function(){
         return Inertia::render("AdminPages/Tours");
     });
+
+    Route::get('/ourtours', [TourController::class, 'index'])->name('ourtours.index');
+    Route::post('/ourtours', [TourController::class, 'store'])->name('ourtours.store');
+    Route::put('/ourtours/{id}', [TourController::class, 'update'])->name('ourtours.update');
+    Route::delete('/ourtours/{id}', [TourController::class, 'destroy'])->name('ourtours.destroy');
 
     // ------------------------------------------------------------------------------
     // Admin Trekking Route
