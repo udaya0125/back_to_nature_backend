@@ -82,6 +82,11 @@ Route::middleware('auth')->group(function () {
         return Inertia::render("AdminPages/Trekking");
     });
 
+    Route::get('/ourtrekkings', [TrekkingController::class, 'index'])->name('ourtrekkings.index');
+    Route::post('/ourtrekkings', [TrekkingController::class, 'store'])->name('ourtrekkings.store');
+    Route::put('/ourtrekkings/{id}', [TrekkingController::class, 'update'])->name('ourtrekkings.update');
+    Route::delete('/ourtrekkings/{id}', [TrekkingController::class, 'destroy'])->name('ourtrekkings.destroy');
+
     // ------------------------------------------------------------------------------
     // Admin Activities Route
     // ------------------------------------------------------------------------------

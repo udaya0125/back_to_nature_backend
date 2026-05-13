@@ -1,4 +1,5 @@
-import React from "react";
+import { X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 const AddTrekkingForm = () => {
     const [submitting, setSubmitting] = useState(false);
@@ -23,7 +24,15 @@ const AddTrekkingForm = () => {
             setShowForm(true);
         } else {
             setTrekkingForm({
-                name: "",
+               title: "",
+        category: "",
+        sub_category: "",
+        description: "",
+        images: null,
+        price: "",
+        includes: "",
+        excludes: "",
+        itinerary: "",
             });
         }
     }, [editingTrekking]);
@@ -65,7 +74,15 @@ const AddTrekkingForm = () => {
                 await handleCreate(formData);
             }
             setTrekkingForm({
-                name: "",
+                title: "",
+                category: "",
+                sub_category: "",
+                description: "",
+                images: null,
+                price: "",
+                includes: "",
+                excludes: "",
+                itinerary: "",
             });
 
             setShowForm(false);
