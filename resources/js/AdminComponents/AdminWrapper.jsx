@@ -10,7 +10,9 @@ const AdminWrapper = ({ children }) => {
             return false;
         }
 
-        return window.localStorage.getItem("admin-sidebar-collapsed") === "true";
+        return (
+            window.localStorage.getItem("admin-sidebar-collapsed") === "true"
+        );
     });
     const { props } = usePage();
     const user = props?.auth?.user || null;
@@ -33,7 +35,7 @@ const AdminWrapper = ({ children }) => {
     useEffect(() => {
         window.localStorage.setItem(
             "admin-sidebar-collapsed",
-            String(isCollapsed)
+            String(isCollapsed),
         );
     }, [isCollapsed]);
 
