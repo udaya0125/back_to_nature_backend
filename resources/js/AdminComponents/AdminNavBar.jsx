@@ -70,7 +70,11 @@ const AdminNavBar = ({ onMenuToggle }) => {
 
                         {/* Optional: Add branding/logo here */}
                         <div className="hidden lg:block px-8">
-                            <img src="/images/logo.png" alt="Logo" className="h-12 w-auto" />
+                            <img
+                                src="/images/logo.png"
+                                alt="Logo"
+                                className="h-12 w-auto"
+                            />
                         </div>
                     </div>
 
