@@ -867,37 +867,37 @@ const AddActivitiesForm = ({
                             </div>
                         </div>
 
-                        {/* Includes & Excludes - Rich Text Editors */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Includes
-                                </label>
-                                <div className="quill-small">
-                                    <ReactQuill
-                                        theme="snow"
-                                        value={activitiesForm.includes}
-                                        onChange={(value) => handleRichTextChange("includes", value)}
-                                        modules={quillModules}
-                                        formats={quillFormats}
-                                        placeholder="What's included..."
-                                    />
-                                </div>
+                        {/* Includes - Full Width */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Includes
+                            </label>
+                            <div className="quill-small">
+                                <ReactQuill
+                                    theme="snow"
+                                    value={activitiesForm.includes}
+                                    onChange={(value) => handleRichTextChange("includes", value)}
+                                    modules={quillModules}
+                                    formats={quillFormats}
+                                    placeholder="What's included..."
+                                />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Excludes
-                                </label>
-                                <div className="quill-small">
-                                    <ReactQuill
-                                        theme="snow"
-                                        value={activitiesForm.excludes}
-                                        onChange={(value) => handleRichTextChange("excludes", value)}
-                                        modules={quillModules}
-                                        formats={quillFormats}
-                                        placeholder="What's excluded..."
-                                    />
-                                </div>
+                        </div>
+
+                        {/* Excludes - Full Width */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Excludes
+                            </label>
+                            <div className="quill-small">
+                                <ReactQuill
+                                    theme="snow"
+                                    value={activitiesForm.excludes}
+                                    onChange={(value) => handleRichTextChange("excludes", value)}
+                                    modules={quillModules}
+                                    formats={quillFormats}
+                                    placeholder="What's excluded..."
+                                />
                             </div>
                         </div>
 
