@@ -78,7 +78,7 @@ const Trekking = () => {
     const columns = useMemo(
         () => [
             {
-                Header: "#",
+                Header: "S.N.",
                 accessor: "index",
                 Cell: ({ row }) => (
                     <span className="text-gray-400 font-medium">
@@ -189,17 +189,10 @@ const Trekking = () => {
                 {/* Header */}
                 <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-100 rounded-lg">
-                            <Mountain size={24} className="text-indigo-600" />
-                        </div>
                         <div>
                             <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
                                 Trekking Management
                             </h1>
-                            <p className="text-sm text-gray-500 mt-0.5">
-                                {allTrekking.length} trek
-                                {allTrekking.length !== 1 ? "s" : ""} listed
-                            </p>
                         </div>
                     </div>
                     <button
