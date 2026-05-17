@@ -93,7 +93,7 @@ const Activities = () => {
     const columns = useMemo(
         () => [
              {
-                Header: "ID",
+                Header: "S.N.",
                 accessor: (row, i) => i + 1,
                 id: "rowIndex",
                 width: 60,
