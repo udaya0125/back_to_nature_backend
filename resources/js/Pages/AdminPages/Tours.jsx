@@ -73,7 +73,7 @@ const Tours = () => {
     const columns = useMemo(
         () => [
             {
-                Header: "#",
+                Header: "S.N.",
                 accessor: "index",
                 Cell: ({ row }) => (
                     <span className="text-gray-400 font-mono text-xs">
@@ -172,10 +172,6 @@ const Tours = () => {
                     <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
                         Tour Management
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {allTour.length} tour{allTour.length !== 1 ? "s" : ""}{" "}
-                        total
-                    </p>
                 </div>
                 <button
                     onClick={() => setShowAddForm(true)}
