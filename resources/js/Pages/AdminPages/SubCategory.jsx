@@ -354,7 +354,7 @@ const SubCategory = () => {
             </div>
 
             {/* SubCategories Table using MyTable */}
-            {allSubCategories.length === 0 ? (
+            {/* {allSubCategories.length === 0 ? (
                 <div className="bg-white rounded-xl shadow overflow-hidden">
                     <div className="px-6 py-8 text-center text-gray-400">
                         No subcategories found.
@@ -362,7 +362,8 @@ const SubCategory = () => {
                 </div>
             ) : (
                 <MyTable columns={columns} data={tableData} />
-            )}
+            )} */}
+            <MyTable columns={columns} data={tableData} />
 
             <AddSubCategoryForm
                 setShowForm={setShowAddForm}
