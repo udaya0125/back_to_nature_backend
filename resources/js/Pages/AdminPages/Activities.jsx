@@ -397,7 +397,7 @@ const Activities = () => {
             </div>
 
             {/* Activities Table using MyTable */}
-            {allActivities.length === 0 ? (
+            {/* {allActivities.length === 0 ? (
                 <div className="bg-white rounded-xl shadow overflow-hidden">
                     <div className="px-6 py-8 text-center text-gray-400">
                         No activities found.
@@ -405,7 +405,8 @@ const Activities = () => {
                 </div>
             ) : (
                 <MyTable columns={columns} data={tableData} />
-            )}
+            )} */}
+             <MyTable columns={columns} data={tableData} />
 
             <AddActivitiesForm
                 showForm={showAddForm}

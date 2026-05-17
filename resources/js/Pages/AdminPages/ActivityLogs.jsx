@@ -3,7 +3,6 @@ import React, { useState, useMemo, useEffect } from "react";
 import axios from "axios";
 import MyTable from "@/MyTable/MyTable";
 
-
 const ActivityLogs = () => {
     const [activityLogs, setActivityLogs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,7 +23,7 @@ const ActivityLogs = () => {
                 } else {
                     console.error(
                         "Unexpected response structure:",
-                        responseData
+                        responseData,
                     );
                     setActivityLogs([]);
                     setError("Unexpected data format received from server.");
@@ -68,7 +67,7 @@ const ActivityLogs = () => {
                 },
             },
         ],
-        []
+        [],
     );
 
     return (
@@ -82,7 +81,7 @@ const ActivityLogs = () => {
                     </div>
                 </div>
 
-                {loading ? (
+                {/* {loading ? (
                     <div className="text-center py-8">Loading...</div>
                 ) : error ? (
                     <div className="text-center py-8 text-red-500">{error}</div>
@@ -91,7 +90,8 @@ const ActivityLogs = () => {
                         columns={columns} 
                         data={activityLogs} 
                     />
-                )}
+                )} */}
+                <MyTable columns={columns} data={activityLogs} />
             </div>
         </AdminWrapper>
     );

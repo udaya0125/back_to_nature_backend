@@ -1,16 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
-import {
-    Plus,
-    Edit,
-    Trash2,
-} from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import axios from "axios";
 import AddUserForm from "@/AddComponents/AddUserForm";
 import { usePage } from "@inertiajs/react";
 import EditUserForm from "@/EditComponents/EditUserForm";
 import MyTable from "@/MyTable/MyTable";
-
 
 const UserManagement = () => {
     const [allUsers, setAllUsers] = useState([]);
@@ -45,7 +40,7 @@ const UserManagement = () => {
         if (!isAdmin) return;
         if (
             !window.confirm(
-                "Are you sure you want to delete this team member? Deleting user means they won't be able to log in."
+                "Are you sure you want to delete this team member? Deleting user means they won't be able to log in.",
             )
         )
             return;
@@ -167,10 +162,10 @@ const UserManagement = () => {
                             value === "admin"
                                 ? "bg-red-100 text-red-800"
                                 : value === "moderator"
-                                ? "bg-orange-100 text-orange-800"
-                                : value === "editor"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-blue-100 text-blue-800"
+                                  ? "bg-orange-100 text-orange-800"
+                                  : value === "editor"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-blue-100 text-blue-800"
                         }`}
                     >
                         {value.charAt(0).toUpperCase() + value.slice(1)}
@@ -207,7 +202,7 @@ const UserManagement = () => {
                   ]
                 : []),
         ],
-        [isAdmin, imgurl]
+        [isAdmin, imgurl],
     );
 
     return (
@@ -249,14 +244,16 @@ const UserManagement = () => {
                     />
                 )}
 
-                {loading ? (
+                {/* {loading ? (
                     <div className="text-center py-8">Loading users...</div>
                 ) : (
                     <MyTable 
                         columns={columns} 
                         data={allUsers} 
                     />
-                )}
+                )} */}
+
+                <MyTable columns={columns} data={allUsers} />
             </div>
         </AdminWrapper>
     );

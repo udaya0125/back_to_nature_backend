@@ -276,7 +276,7 @@ const Category = () => {
             </div>
 
             {/* Category Table using MyTable */}
-            {allCategory.length === 0 ? (
+            {/* {allCategory.length === 0 ? (
                 <div className="bg-white rounded-xl shadow overflow-hidden">
                     <div className="px-6 py-8 text-center text-gray-400">
                         No categories found.
@@ -284,7 +284,8 @@ const Category = () => {
                 </div>
             ) : (
                 <MyTable columns={columns} data={tableData} />
-            )}
+            )} */}
+              <MyTable columns={columns} data={tableData} />
 
             <AddCategoryForm
                 showForm={showAddForm}
