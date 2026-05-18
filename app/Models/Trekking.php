@@ -17,19 +17,40 @@ class Trekking extends Model
      * We don't have the ID yet, so we use a unique suffix instead.
      * After creation, the `created` hook re-saves with the real ID appended.
      */
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     // Before insert — give a temporary unique slug so the row can be saved
+    //     static::creating(function ($trekking) {
+    //         $trekking->slug = Str::slug($trekking->title).'-'.uniqid();
+    //     });
+
+    //     // After insert — replace with the clean slug that includes the real ID
+    //     static::created(function ($trekking) {
+    //         $trekking->slug = Str::slug($trekking->title).'-'.$trekking->id;
+    //         $trekking->saveQuietly();
+    //     });
+    // }
+
     protected static function boot()
     {
         parent::boot();
 
-        // Before insert — give a temporary unique slug so the row can be saved
+        // On CREATE: generate slug with random 5-digit number
         static::creating(function ($trekking) {
-            $trekking->slug = Str::slug($trekking->title).'-'.uniqid();
+            $trekking->slug = Str::slug($trekking->title).'-'.rand(10000, 99999);
         });
 
-        // After insert — replace with the clean slug that includes the real ID
-        static::created(function ($trekking) {
-            $trekking->slug = Str::slug($trekking->title).'-'.$trekking->id;
-            $trekking->saveQuietly();
+        // On UPDATE: if title changed, rebuild slug keeping the same 5-digit number
+        static::updating(function ($trekking) {
+            if ($trekking->isDirty('title')) {
+                // Extract the existing 5-digit number from the old slug
+                preg_match('/-(\d{5})$/', $trekking->getOriginal('slug'), $matches);
+                $number = $matches[1] ?? rand(10000, 99999); // fallback if not found
+
+                $trekking->slug = Str::slug($trekking->title).'-'.$number;
+            }
         });
     }
 

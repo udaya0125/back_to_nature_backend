@@ -48,19 +48,40 @@ class Activities extends Model
         return $this->hasMany(Faq::class);
     }
 
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     // Step 1: before insert, create base slug
+    //     static::creating(function ($activity) {
+    //         $activity->slug = Str::slug($activity->title);
+    //     });
+
+    //     // Step 2: after insert, append ID to make it unique
+    //     static::created(function ($activity) {
+    //         $activity->slug = $activity->slug.'-'.$activity->id;
+    //         $activity->saveQuietly(); // avoid triggering events again
+    //     });
+    // }
+
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        // Step 1: before insert, create base slug
-        static::creating(function ($activity) {
-            $activity->slug = Str::slug($activity->title);
-        });
+    // On CREATE: generate slug with random 5-digit number
+    static::creating(function ($activity) {
+        $activity->slug = Str::slug($activity->title) . '-' . rand(10000, 99999);
+    });
 
-        // Step 2: after insert, append ID to make it unique
-        static::created(function ($activity) {
-            $activity->slug = $activity->slug.'-'.$activity->id;
-            $activity->saveQuietly(); // avoid triggering events again
-        });
-    }
+    // On UPDATE: if title changed, rebuild slug keeping the same 5-digit number
+    static::updating(function ($activity) {
+        if ($activity->isDirty('title')) {
+            // Extract the existing 5-digit number from the old slug
+            preg_match('/-(\d{5})$/', $activity->getOriginal('slug'), $matches);
+            $number = $matches[1] ?? rand(10000, 99999); // fallback if not found
+
+            $activity->slug = Str::slug($activity->title) . '-' . $number;
+        }
+    });
+}
 }
