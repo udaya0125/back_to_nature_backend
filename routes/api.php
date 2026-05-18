@@ -45,7 +45,7 @@ Route::get('/user', function (Request $request) {
     Route::get('/tours/{slug}', [TourController::class, 'indexShowTourSlug']);
 
 
-    Route::get('/trekkings', [TrekkingController::class, 'index']);
+    Route::get('/trekkings', [TrekkingController::class, 'indexShow']);
 
     // ############################################################################################
     // API route to fetch Activities

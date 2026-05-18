@@ -26,15 +26,55 @@ class TrekkingController extends Controller
         ]);
     }
 
-    public function indexShowTrekkingSlug($slug)
+    /**
+     * Display all trekkings (title, description, price and first image only)
+     */
+    public function indexShow()
     {
-        $trekkings = Trekking::where('slug', $slug)->firstOrFail();
+        $trekkings = Trekking::with(['images' => function ($query) {
+            $query->oldest()->limit(1);
+        }])
+            ->select('id', 'title', 'description', 'price', 'slug')
+            ->latest()
+            ->get()
+            ->map(function ($trekking) {
+                return [
+                    'id' => $trekking->id,
+                    'title' => $trekking->title,
+                    'description' => $trekking->description,
+                    'price' => $trekking->price,
+                    'slug' => $trekking->slug,
+                    'image' => $trekking->images->first()?->image ?? null,
+                ];
+            });
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'data' => $trekkings,
         ]);
     }
+
+    public function indexShowTrekkingSlug($slug)
+    {
+        $trekking = Trekking::with(['category', 'images', 'itineraries'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => $trekking,
+        ]);
+    }
+
+    // public function indexShowTrekkingSlug($slug)
+    // {
+    //     $trekkings = Trekking::where('slug', $slug)->firstOrFail();
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $trekkings,
+    //     ]);
+    // }
 
     /**
      * Store new trekking
