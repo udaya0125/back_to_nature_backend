@@ -116,7 +116,7 @@ public function indexNavbar()
             'excludes' => 'nullable|string',
 
             // images
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',  // 5MB max
 
             // itineraries
             'itineraries' => 'nullable|array',
@@ -182,85 +182,104 @@ public function indexNavbar()
     /**
      * Update trekking
      */
-    public function update(Request $request, $id)
-    {
-        $trekking = Trekking::findOrFail($id);
-        $oldTitle = $trekking->title;
+  /**
+ * Update trekking
+ */
+public function update(Request $request, $id)
+{
+    $trekking = Trekking::findOrFail($id);
+    $oldTitle = $trekking->title;
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'sub_category_id' => 'nullable|exists:sub_categories,id',
-            'price' => 'nullable|numeric',
-            'description' => 'required|string',
-            'includes' => 'nullable|string',
-            'excludes' => 'nullable|string',
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'sub_category_id' => 'nullable|exists:sub_categories,id',
+        'price' => 'nullable|numeric',
+        'description' => 'required|string',
+        'includes' => 'nullable|string',
+        'excludes' => 'nullable|string',
 
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',  // 5MB max
+        'deleted_images.*' => 'nullable|exists:trekking_images,id', // Add validation for deleted images
 
-            'itineraries' => 'nullable|array',
-            'itineraries.*.day' => 'required',
-            'itineraries.*.title' => 'required|string',
-            'itineraries.*.description' => 'required|string',
-        ]);
+        'itineraries' => 'nullable|array',
+        'itineraries.*.day' => 'required',
+        'itineraries.*.title' => 'required|string',
+        'itineraries.*.description' => 'required|string',
+    ]);
 
-        // Update trekking
-        $trekking->update([
-            'title' => $request->title,
-            'category_id' => $request->category_id,
-            'sub_category_id' => $request->sub_category_id,
-            'price' => $request->price,
-            'description' => $request->description,
-            'includes' => $request->includes,
-            'excludes' => $request->excludes,
-        ]);
+    // Update trekking
+    $trekking->update([
+        'title' => $request->title,
+        'category_id' => $request->category_id,
+        'sub_category_id' => $request->sub_category_id,
+        'price' => $request->price,
+        'description' => $request->description,
+        'includes' => $request->includes,
+        'excludes' => $request->excludes,
+    ]);
 
-        /**
-         * Upload new images
-         */
-        if ($request->hasFile('images')) {
-
-            foreach ($request->file('images') as $image) {
-
-                $path = $image->store('trekkings', 'public');
-
-                $trekking->images()->create([
-                    'image' => $path,
-                ]);
+    /**
+     * Delete images that were marked for deletion
+     */
+    if ($request->has('deleted_images')) {
+        $deletedImageIds = $request->deleted_images;
+        
+        // Get the images to delete
+        $imagesToDelete = $trekking->images()->whereIn('id', $deletedImageIds)->get();
+        
+        foreach ($imagesToDelete as $image) {
+            // Delete physical file from storage
+            if (Storage::disk('public')->exists($image->image)) {
+                Storage::disk('public')->delete($image->image);
             }
+            // Delete database record
+            $image->delete();
         }
-
-        /**
-         * Replace itineraries
-         */
-        if ($request->has('itineraries')) {
-
-            // delete old itineraries
-            $trekking->itineraries()->delete();
-
-            // add new itineraries
-            foreach ($request->itineraries as $item) {
-
-                $trekking->itineraries()->create([
-                    'day' => $item['day'],
-                    'title' => $item['title'],
-                    'description' => $item['description'],
-                ]);
-            }
-        }
-
-        ActivityLog::create([
-            'name' => auth()->user()->name ?? 'System',
-            'ip_address' => $request->ip(),
-            'title' => 'Updated trekking: "'.$oldTitle.'" -> "'.$trekking->title.'"',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Trekking updated successfully',
-            'data' => $trekking->load('images', 'itineraries'),
-        ]);
     }
+
+    /**
+     * Upload new images
+     */
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('trekkings', 'public');
+            
+            $trekking->images()->create([
+                'image' => $path,
+            ]);
+        }
+    }
+
+    /**
+     * Replace itineraries
+     */
+    if ($request->has('itineraries')) {
+        // delete old itineraries
+        $trekking->itineraries()->delete();
+
+        // add new itineraries
+        foreach ($request->itineraries as $item) {
+            $trekking->itineraries()->create([
+                'day' => $item['day'],
+                'title' => $item['title'],
+                'description' => $item['description'],
+            ]);
+        }
+    }
+
+    ActivityLog::create([
+        'name' => auth()->user()->name ?? 'System',
+        'ip_address' => $request->ip(),
+        'title' => 'Updated trekking: "'.$oldTitle.'" -> "'.$trekking->title.'"',
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Trekking updated successfully',
+        'data' => $trekking->load('images', 'itineraries'),
+    ]);
+}
 
     /**
      * Delete trekking

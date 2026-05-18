@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Plus, ImageOff } from "lucide-react";
 import AddActivitiesForm from "@/AddComponents/AddActivitiesForm";
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import MyTable from "@/MyTable/MyTable";
@@ -14,46 +14,53 @@ const Activities = () => {
     const [editingActivity, setEditingActivity] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
+    const [tableRefreshKey, setTableRefreshKey] = useState(0);
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
+
+    const fetchActivities = useCallback(async () => {
+        try {
+            const response = await axios.get(route("ouractivities.index"));
+            setAllActivities(response.data.data || []);
+        } catch (error) {
+            console.error("Error fetching activities:", error);
+        }
+    }, []);
+
+    const fetchCategory = useCallback(async () => {
+        try {
+            const response = await axios.get(
+                route("categorywithsubcategory.indexWithSubCategory")
+            );
+            setAllCategory(response.data.data || []);
+
+            const subCategories = [];
+            response.data.data.forEach((category) => {
+                if (
+                    category.sub_categories &&
+                    category.sub_categories.length > 0
+                ) {
+                    subCategories.push(...category.sub_categories);
+                }
+            });
+            setAllSubCategory(subCategories);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            setAllCategory([]);
+            setAllSubCategory([]);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchActivities = async () => {
-            try {
-                const response = await axios.get(route("ouractivities.index"));
-                setAllActivities(response.data.data || []);
-            } catch (error) {
-                console.error("Error fetching activities:", error);
-            }
-        };
-
-        const fetchCategory = async () => {
-            try {
-                const response = await axios.get(
-                    route("categorywithsubcategory.indexWithSubCategory")
-                );
-                setAllCategory(response.data.data || []);
-                // Extract all subcategories from categories
-                const subCategories = [];
-                response.data.data.forEach(category => {
-                    if (category.sub_categories && category.sub_categories.length > 0) {
-                        subCategories.push(...category.sub_categories);
-                    }
-                });
-                setAllSubCategory(subCategories);
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-                setAllCategory([]);
-                setAllSubCategory([]);
-            }
-        };
-
         fetchActivities();
         fetchCategory();
-    }, [reloadTrigger]);
+    }, [reloadTrigger, fetchActivities, fetchCategory]);
 
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to delete this activity?")) return;
         try {
             await axios.delete(route("ouractivities.destroy", { id }));
+            await fetchActivities();
+            setTableRefreshKey((prev) => prev + 1);
             setReloadTrigger((prev) => !prev);
         } catch (error) {
             console.error("Error deleting activity:", error);
@@ -72,6 +79,8 @@ const Activities = () => {
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
         );
+        await fetchActivities();
+        setTableRefreshKey((prev) => prev + 1);
         setReloadTrigger((prev) => !prev);
         return response.data;
     };
@@ -99,6 +108,22 @@ const Activities = () => {
                 width: 60,
             },
             {
+                Header: "Image",
+                accessor: "images",
+                Cell: ({ value }) =>
+                    value?.[0] ? (
+                        <img
+                            src={`${imgurl}/${value[0].image}`}
+                            alt="Tour"
+                            className="w-10 h-10 rounded-lg object-cover border border-gray-200"
+                        />
+                    ) : (
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                            <ImageOff size={14} className="text-gray-400" />
+                        </div>
+                    ),
+            },
+            {
                 Header: "Title",
                 accessor: "title",
                 Cell: ({ value }) => (
@@ -117,13 +142,6 @@ const Activities = () => {
                 accessor: "sub_category_id",
                 Cell: ({ value }) => (
                     <span className="text-gray-600">{getSubCategoryName(value)}</span>
-                ),
-            },
-            {
-                Header: "Images",
-                accessor: "images",
-                Cell: ({ value }) => (
-                    <span className="text-gray-600">{value?.length ?? 0}</span>
                 ),
             },
             {
@@ -195,7 +213,11 @@ const Activities = () => {
             ) : (
                 <MyTable columns={columns} data={tableData} />
             )} */}
-             <MyTable columns={columns} data={tableData} />
+             <MyTable
+                key={tableRefreshKey}
+                columns={columns}
+                data={tableData}
+            />
 
             <AddActivitiesForm
                 showForm={showAddForm}

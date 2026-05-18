@@ -37,7 +37,7 @@ const UserManagement = () => {
     }, [reloadTrigger]);
 
     const handleDelete = async (id) => {
-        if (!isAdmin) return;
+        // if (!isAdmin) return;
         if (
             !window.confirm(
                 "Are you sure you want to delete this team member? Deleting user means they won't be able to log in.",
@@ -172,35 +172,58 @@ const UserManagement = () => {
                     </span>
                 ),
             },
-            ...(isAdmin
-                ? [
-                      {
-                          Header: "Actions",
-                          accessor: "actions",
-                          disableSortBy: true,
-                          Cell: ({ row }) => (
-                              <div className="flex space-x-2">
-                                  <button
-                                      onClick={() => handleEdit(row.original)}
-                                      className="text-blue-600 hover:text-blue-900 transition-colors"
-                                      title="Edit"
-                                  >
-                                      <Edit size={18} />
-                                  </button>
-                                  <button
-                                      onClick={() =>
-                                          handleDelete(row.original.id)
-                                      }
-                                      className="text-red-600 hover:text-red-900 transition-colors"
-                                      title="Delete"
-                                  >
-                                      <Trash2 size={18} />
-                                  </button>
-                              </div>
-                          ),
-                      },
-                  ]
-                : []),
+            // ...(isAdmin
+            //     ? [
+            //           {
+            //               Header: "Actions",
+            //               accessor: "actions",
+            //               disableSortBy: true,
+            //               Cell: ({ row }) => (
+            //                   <div className="flex space-x-2">
+            //                       <button
+            //                           onClick={() => handleEdit(row.original)}
+            //                           className="text-blue-600 hover:text-blue-900 transition-colors"
+            //                           title="Edit"
+            //                       >
+            //                           <Edit size={18} />
+            //                       </button>
+            //                       <button
+            //                           onClick={() =>
+            //                               handleDelete(row.original.id)
+            //                           }
+            //                           className="text-red-600 hover:text-red-900 transition-colors"
+            //                           title="Delete"
+            //                       >
+            //                           <Trash2 size={18} />
+            //                       </button>
+            //                   </div>
+            //               ),
+            //           },
+            //       ]
+            //     : []),
+            {
+                Header: "Actions",
+                accessor: "actions",
+                disableSortBy: true,
+                Cell: ({ row }) => (
+                    <div className="flex space-x-2">
+                        <button
+                            onClick={() => handleEdit(row.original)}
+                            className="text-blue-600 hover:text-blue-900 transition-colors"
+                            title="Edit"
+                        >
+                            <Edit size={18} />
+                        </button>
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="text-red-600 hover:text-red-900 transition-colors"
+                            title="Delete"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
+                ),
+            },
         ],
         [isAdmin, imgurl],
     );
@@ -214,27 +237,40 @@ const UserManagement = () => {
                             User Management
                         </h1>
                     </div>
-                    {isAdmin && (
-                        <button
-                            onClick={handleAdd}
-                            className="mt-2 md:mt-0 py-2 md:py-3 px-4 md:px-6 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 flex items-center gap-2 text-sm md:text-base"
-                        >
-                            <Plus size={18} className="hidden md:block" />
-                            <span>Add User</span>
-                        </button>
-                    )}
+
+                    <button
+                        onClick={handleAdd}
+                        className="mt-2 md:mt-0 py-2 md:py-3 px-4 md:px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center gap-2 text-sm md:text-base"
+                    >
+                        <Plus size={18} className="hidden md:block" />
+                        <span>Add User</span>
+                    </button>
                 </div>
 
-                {showAddForm && isAdmin && (
+                {/* {showAddForm && isAdmin && (
                     <AddUserForm
                         showForm={showAddForm}
                         setShowForm={setShowAddForm}
                         onClose={handleAddFormClose}
                         onUserAdded={handleUserAdded}
                     />
-                )}
+                )} */}
+                <AddUserForm
+                    showForm={showAddForm}
+                    setShowForm={setShowAddForm}
+                    onClose={handleAddFormClose}
+                    onUserAdded={handleUserAdded}
+                />
 
-                {showEditForm && isAdmin && editingUser && (
+                <EditUserForm
+                    showForm={showEditForm}
+                    setShowForm={setShowEditForm}
+                    editingUser={editingUser}
+                    onClose={handleEditFormClose}
+                    onUserUpdated={handleUserUpdated}
+                />
+
+                {/* {showEditForm && isAdmin && editingUser && (
                     <EditUserForm
                         showForm={showEditForm}
                         setShowForm={setShowEditForm}
@@ -242,7 +278,7 @@ const UserManagement = () => {
                         onClose={handleEditFormClose}
                         onUserUpdated={handleUserUpdated}
                     />
-                )}
+                )} */}
 
                 {/* {loading ? (
                     <div className="text-center py-8">Loading users...</div>

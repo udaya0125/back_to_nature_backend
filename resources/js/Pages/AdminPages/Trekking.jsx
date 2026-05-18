@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
 import { Plus, Pencil, Trash2, Mountain, ImageOff } from "lucide-react";
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
@@ -14,42 +14,46 @@ const Trekking = () => {
     const [showAddForm, setShowAddForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [tableRefreshKey, setTableRefreshKey] = useState(0);
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
+
+    const fetchTrekking = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(route("ourtrekkings.index"));
+            setAllTrekking(response.data.data || response.data || []);
+        } catch (error) {
+            console.error("Error fetching trekking:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchCategory = useCallback(async () => {
+        try {
+            const response = await axios.get(
+                route("categorywithsubcategory.indexWithSubCategory"),
+            );
+            setAllCategory(response.data.data || []);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            setAllCategory([]);
+        }
+    }, []);
 
     // Fetch trekking + categories on mount / reload
     useEffect(() => {
-        const fetchTrekking = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(route("ourtrekkings.index"));
-                setAllTrekking(response.data.data || response.data || []);
-            } catch (error) {
-                console.error("Error fetching trekking:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchCategory = async () => {
-            try {
-                const response = await axios.get(
-                    route("categorywithsubcategory.indexWithSubCategory"),
-                );
-                setAllCategory(response.data.data || []);
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-                setAllCategory([]);
-            }
-        };
-
         fetchTrekking();
         fetchCategory();
-    }, [reloadTrigger]);
+    }, [reloadTrigger, fetchTrekking, fetchCategory]);
 
     // Delete handler
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to delete this trekking?")) return;
         try {
             await axios.delete(route("ourtrekkings.destroy", { id }));
+            await fetchTrekking();
+            setTableRefreshKey((prev) => prev + 1);
             setReloadTrigger((prev) => !prev);
         } catch (error) {
             console.error("Error deleting trekking:", error);
@@ -70,6 +74,8 @@ const Trekking = () => {
             formData,
             { headers: { "Content-Type": "multipart/form-data" } },
         );
+        await fetchTrekking();
+        setTableRefreshKey((prev) => prev + 1);
         setReloadTrigger((prev) => !prev);
         return response.data;
     };
@@ -92,7 +98,7 @@ const Trekking = () => {
                 Cell: ({ value }) =>
                     value && value.length > 0 ? (
                         <img
-                            src={`/storage/${value[0].image}`}
+                            src={`${imgurl}/${value[0].image}`}
                             alt="Trek"
                             className="w-12 h-12 object-cover rounded-lg border border-gray-100"
                         />
@@ -206,7 +212,11 @@ const Trekking = () => {
 
                 {/* Table */}
 
-                <MyTable columns={columns} data={allTrekking} />
+                <MyTable
+                    key={tableRefreshKey}
+                    columns={columns}
+                    data={allTrekking}
+                />
 
                 {/* Add Form */}
                 <AddTrekkingForm

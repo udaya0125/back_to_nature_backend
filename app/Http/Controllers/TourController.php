@@ -115,7 +115,7 @@ class TourController extends Controller
 
             // Images
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120', // 5MB max
 
             // Itineraries
             'itineraries' => 'nullable|array',
@@ -198,102 +198,124 @@ class TourController extends Controller
     /**
      * Update Tour
      */
-    public function update(Request $request, $id)
-    {
-        $tour = Tour::with(['images', 'itineraries'])->findOrFail($id);
+  /**
+ * Update Tour
+ */
+public function update(Request $request, $id)
+{
+    $tour = Tour::with(['images', 'itineraries'])->findOrFail($id);
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'required|string',
-            'includes' => 'nullable|string',
-            'excludes' => 'nullable|string',
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'description' => 'required|string',
+        'includes' => 'nullable|string',
+        'excludes' => 'nullable|string',
 
-            // New Images
-            'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+        // New Images
+        'images' => 'nullable|array',
+        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',  // 5MB max
+        
+        // Deleted Images
+        'deleted_images' => 'nullable|array',
+        'deleted_images.*' => 'exists:tour_images,id', // Validate image IDs exist
 
-            // Itineraries
-            'itineraries' => 'nullable|array',
-            'itineraries.*.day' => 'required',
-            'itineraries.*.title' => 'required|string|max:255',
-            'itineraries.*.description' => 'required|string',
+        // Itineraries
+        'itineraries' => 'nullable|array',
+        'itineraries.*.day' => 'required',
+        'itineraries.*.title' => 'required|string|max:255',
+        'itineraries.*.description' => 'required|string',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $oldTitle = $tour->title;
+
+        // Update Tour
+        $tour->update([
+            'title' => $request->title,
+            'category_id' => $request->category_id,
+            'description' => $request->description,
+            'includes' => $request->includes,
+            'excludes' => $request->excludes,
+            'slug' => Str::slug($request->title), // Update slug when title changes
         ]);
 
-        DB::beginTransaction();
-
-        try {
-            $oldTitle = $tour->title;
-
-            // Update Tour
-            $tour->update([
-                'title' => $request->title,
-                'category_id' => $request->category_id,
-                'description' => $request->description,
-                'includes' => $request->includes,
-                'excludes' => $request->excludes,
-            ]);
-
-            /**
-             * Add New Images
-             */
-            if ($request->hasFile('images')) {
-
-                foreach ($request->file('images') as $image) {
-
-                    $path = $image->store('tours', 'public');
-
-                    TourImage::create([
-                        'tour_id' => $tour->id,
-                        'image' => $path,
-                    ]);
+        /**
+         * Delete images that were marked for deletion
+         */
+        if ($request->has('deleted_images')) {
+            $deletedImageIds = $request->deleted_images;
+            
+            // Get the images to delete
+            $imagesToDelete = $tour->images()->whereIn('id', $deletedImageIds)->get();
+            
+            foreach ($imagesToDelete as $image) {
+                // Delete physical file from storage
+                if (Storage::disk('public')->exists($image->image)) {
+                    Storage::disk('public')->delete($image->image);
                 }
+                // Delete database record
+                $image->delete();
             }
-
-            /**
-             * Replace Itineraries
-             */
-            if ($request->has('itineraries')) {
-
-                // Delete old itineraries
-                $tour->itineraries()->delete();
-
-                // Add new itineraries
-                foreach ($request->itineraries as $item) {
-
-                    TourItinerary::create([
-                        'tour_id' => $tour->id,
-                        'day' => $item['day'],
-                        'title' => $item['title'],
-                        'description' => $item['description'],
-                    ]);
-                }
-            }
-
-            ActivityLog::create([
-                'name' => auth()->user()->name ?? 'System',
-                'ip_address' => $request->ip(),
-                'title' => 'Updated tour: "'.$oldTitle.'" -> "'.$tour->title.'"',
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Tour updated successfully',
-                'data' => $tour->load(['images', 'itineraries']),
-            ], 200);
-
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
         }
+
+        /**
+         * Add New Images
+         */
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('tours', 'public');
+
+                TourImage::create([
+                    'tour_id' => $tour->id,
+                    'image' => $path,
+                ]);
+            }
+        }
+
+        /**
+         * Replace Itineraries
+         */
+        if ($request->has('itineraries')) {
+            // Delete old itineraries
+            $tour->itineraries()->delete();
+
+            // Add new itineraries
+            foreach ($request->itineraries as $item) {
+                TourItinerary::create([
+                    'tour_id' => $tour->id,
+                    'day' => $item['day'],
+                    'title' => $item['title'],
+                    'description' => $item['description'],
+                ]);
+            }
+        }
+
+        ActivityLog::create([
+            'name' => auth()->user()->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title' => 'Updated tour: "' . $oldTitle . '" -> "' . $tour->title . '"',
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tour updated successfully',
+            'data' => $tour->load(['images', 'itineraries']),
+        ], 200);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 500);
     }
+}
 
     /**
      * Delete Tour

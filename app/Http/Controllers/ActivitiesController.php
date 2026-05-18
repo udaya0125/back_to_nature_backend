@@ -8,6 +8,7 @@ use App\Models\ActivityItinerary;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ActivitiesController extends Controller
@@ -77,6 +78,9 @@ class ActivitiesController extends Controller
         ]);
     }
 
+    /**
+     * Display single activity by slug with all relations
+     */
     public function indexShowActivitySlug($slug)
     {
         $activity = Activities::with(['images', 'itineraries'])
@@ -89,35 +93,25 @@ class ActivitiesController extends Controller
         ]);
     }
 
-    //  public function indexShowActivitySlug($slug)
-    // {
-    //     $activities = Activities::where('slug', $slug)->firstOrFail();
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => $activities,
-    //     ]);
-    // }
-
     /**
      * STORE - Create activity with images + itineraries
      */
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string',
-            'category_id' => 'required|integer',
-            'sub_category_id' => 'required|integer',
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|integer|exists:categories,id',
+            'sub_category_id' => 'required|integer|exists:sub_categories,id',
             'description' => 'nullable|string',
             'includes' => 'nullable|string',
             'excludes' => 'nullable|string',
 
             // arrays
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',  // 5MB max
             'itineraries' => 'array',
-            'itineraries.*.day' => 'required',
-            'itineraries.*.title' => 'required',
-            'itineraries.*.description' => 'required',
+            'itineraries.*.day' => 'required|integer',
+            'itineraries.*.title' => 'required|string|max:255',
+            'itineraries.*.description' => 'required|string',
         ]);
 
         DB::beginTransaction();
@@ -131,7 +125,7 @@ class ActivitiesController extends Controller
                 'description' => $request->description,
                 'includes' => $request->includes,
                 'excludes' => $request->excludes,
-                'slug' => Str::slug($request->title),
+                'slug' => Str::slug($request->title) . '-' . uniqid(),
             ]);
 
             // 2. Save Images
@@ -147,7 +141,7 @@ class ActivitiesController extends Controller
             }
 
             // 3. Save Itineraries
-            if ($request->itineraries) {
+            if ($request->has('itineraries') && !empty($request->itineraries)) {
                 foreach ($request->itineraries as $itinerary) {
                     ActivityItinerary::create([
                         'activity_id' => $activity->id,
@@ -161,7 +155,7 @@ class ActivitiesController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => $request->ip(),
-                'title' => 'Created activity: '.$activity->title,
+                'title' => 'Created activity: ' . $activity->title,
             ]);
 
             DB::commit();
@@ -177,22 +171,38 @@ class ActivitiesController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to create activity: ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * UPDATE - Update activity + relations
+     * UPDATE - Update activity + relations with proper image deletion
      */
     public function update(Request $request, $id)
     {
         $activity = Activities::findOrFail($id);
 
         $request->validate([
-            'title' => 'required|string',
-            'category_id' => 'required|integer',
-            'sub_category_id' => 'required|integer',
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|integer|exists:categories,id',
+            'sub_category_id' => 'required|integer|exists:sub_categories,id',
+            'description' => 'nullable|string',
+            'includes' => 'nullable|string',
+            'excludes' => 'nullable|string',
+            
+            // Handle deleted images from frontend
+            'deleted_images' => 'array',
+            'deleted_images.*' => 'integer|exists:activity_images,id',
+            
+            // New images
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+            
+            // Itineraries
+            'itineraries' => 'array',
+            'itineraries.*.day' => 'required|integer',
+            'itineraries.*.title' => 'required|string|max:255',
+            'itineraries.*.description' => 'required|string',
         ]);
 
         DB::beginTransaction();
@@ -200,7 +210,7 @@ class ActivitiesController extends Controller
         try {
             $oldTitle = $activity->title;
 
-            // Update main activity
+            // 1. Update main activity
             $activity->update([
                 'title' => $request->title,
                 'category_id' => $request->category_id,
@@ -208,18 +218,30 @@ class ActivitiesController extends Controller
                 'description' => $request->description,
                 'includes' => $request->includes,
                 'excludes' => $request->excludes,
-                'slug' => Str::slug($request->title).'-'.$activity->id,
+                'slug' => Str::slug($request->title) . '-' . $activity->id,
             ]);
 
-            // OPTIONAL: replace images
+            // 2. Handle deleted images (remove from storage and database)
+            if ($request->has('deleted_images') && !empty($request->deleted_images)) {
+                $imagesToDelete = ActivityImage::whereIn('id', $request->deleted_images)
+                    ->where('activity_id', $activity->id)
+                    ->get();
+                
+                foreach ($imagesToDelete as $image) {
+                    // Delete physical file from storage
+                    if ($image->image && Storage::disk('public')->exists($image->image)) {
+                        Storage::disk('public')->delete($image->image);
+                    }
+                    // Delete database record
+                    $image->delete();
+                }
+            }
+
+            // 3. Add new images
             if ($request->hasFile('images')) {
-
-                // delete old images
-                $activity->images()->delete();
-
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('activities', 'public');
-
+                    
                     ActivityImage::create([
                         'activity_id' => $activity->id,
                         'image' => $path,
@@ -227,10 +249,12 @@ class ActivitiesController extends Controller
                 }
             }
 
-            // OPTIONAL: replace itineraries
-            if ($request->itineraries) {
+            // 4. Handle itineraries (complete replacement)
+            if ($request->has('itineraries')) {
+                // Delete existing itineraries
                 $activity->itineraries()->delete();
-
+                
+                // Create new itineraries
                 foreach ($request->itineraries as $itinerary) {
                     ActivityItinerary::create([
                         'activity_id' => $activity->id,
@@ -244,7 +268,7 @@ class ActivitiesController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => $request->ip(),
-                'title' => 'Updated activity: "'.$oldTitle.'" -> "'.$activity->title.'"',
+                'title' => 'Updated activity: "' . $oldTitle . '" -> "' . $activity->title . '"',
             ]);
 
             DB::commit();
@@ -260,13 +284,13 @@ class ActivitiesController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to update activity: ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * DELETE - Delete activity + relations
+     * DELETE - Delete activity + relations with physical file cleanup
      */
     public function destroy($id)
     {
@@ -277,17 +301,24 @@ class ActivitiesController extends Controller
         try {
             $activityTitle = $activity->title;
 
-            // delete related records first
+            // Delete physical image files from storage
+            foreach ($activity->images as $image) {
+                if ($image->image && Storage::disk('public')->exists($image->image)) {
+                    Storage::disk('public')->delete($image->image);
+                }
+            }
+            
+            // Delete related records first
             $activity->images()->delete();
             $activity->itineraries()->delete();
 
-            // delete activity
+            // Delete activity
             $activity->delete();
 
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => request()->ip(),
-                'title' => 'Deleted activity: '.$activityTitle,
+                'title' => 'Deleted activity: ' . $activityTitle,
             ]);
 
             DB::commit();
@@ -302,8 +333,34 @@ class ActivitiesController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Failed to delete activity: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Get deleted images (optional - for undo functionality)
+     */
+    public function getDeletedImages()
+    {
+        // This is optional - you might want to implement soft deletes for images
+        // For now, just return empty response
+        return response()->json([
+            'status' => true,
+            'data' => [],
+        ]);
+    }
+
+    /**
+     * Restore deleted image (optional - if using soft deletes)
+     */
+    public function restoreImage($id)
+    {
+        // Implement if you want soft delete functionality
+        // For now, return not implemented
+        return response()->json([
+            'status' => false,
+            'message' => 'Feature not implemented',
+        ], 501);
     }
 }

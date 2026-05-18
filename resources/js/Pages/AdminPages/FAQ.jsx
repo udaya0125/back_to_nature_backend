@@ -174,9 +174,6 @@ const FAQ = () => {
                     <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
                         FAQ Management
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {allFaq.length} FAQ{allFaq.length !== 1 ? "s" : ""} total
-                    </p>
                 </div>
                 <button
                     onClick={() => setShowAddForm(true)}
@@ -188,14 +185,16 @@ const FAQ = () => {
             </div>
 
             {/* FAQ Table using MyTable component */}
-            {allFaq.length === 0 ? (
+            {/* {allFaq.length === 0 ? (
                 <div className="text-center py-20 text-gray-400">
                     <p className="text-lg font-medium">No FAQs yet</p>
                     <p className="text-sm mt-1">Click "Create" to add your first FAQ.</p>
                 </div>
             ) : (
                 <MyTable columns={columns} data={tableData} />
-            )}
+            )} */}
+
+             <MyTable columns={columns} data={tableData} />
 
             {/* Answer Modal/Popup */}
             {selectedFaq && (

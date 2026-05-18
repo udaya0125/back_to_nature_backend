@@ -2,7 +2,7 @@ import AddToursForm from "@/AddComponents/AddToursForm";
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import EditToursForm from "@/EditComponents/EditToursForm";
 import { Plus, Pencil, Trash2, ImageOff } from "lucide-react";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import MyTable from "@/MyTable/MyTable";
 
@@ -14,40 +14,44 @@ const Tours = () => {
     const [showAddForm, setShowAddForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [tableRefreshKey, setTableRefreshKey] = useState(0);
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
+
+    const fetchTour = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(route("ourtours.index"));
+            setAllTour(response.data.data || []);
+        } catch (error) {
+            console.error("Error fetching tours:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchCategory = useCallback(async () => {
+        try {
+            const response = await axios.get(
+                route("categorywithsubcategory.indexWithSubCategory"),
+            );
+            setAllCategory(response.data.data || []);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            setAllCategory([]);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchTour = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(route("ourtours.index"));
-                setAllTour(response.data.data || []);
-            } catch (error) {
-                console.error("Error fetching tours:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchCategory = async () => {
-            try {
-                const response = await axios.get(
-                    route("categorywithsubcategory.indexWithSubCategory"),
-                );
-                setAllCategory(response.data.data || []);
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-                setAllCategory([]);
-            }
-        };
-
         fetchTour();
         fetchCategory();
-    }, [reloadTrigger]);
+    }, [reloadTrigger, fetchTour, fetchCategory]);
 
     const handleDelete = async (id) => {
         if (!confirm("Are you sure you want to delete this tour?")) return;
         try {
             await axios.delete(route("ourtours.destroy", { id }));
+            await fetchTour();
+            setTableRefreshKey((prev) => prev + 1);
             setReloadTrigger((prev) => !prev);
         } catch (error) {
             console.error("Error deleting tour:", error);
@@ -65,6 +69,8 @@ const Tours = () => {
             route("ourtours.update", { id }),
             formData,
         );
+        await fetchTour();
+        setTableRefreshKey((prev) => prev + 1);
         setReloadTrigger((prev) => !prev);
         return response.data;
     };
@@ -87,7 +93,7 @@ const Tours = () => {
                 Cell: ({ value }) =>
                     value?.[0] ? (
                         <img
-                            src={`/storage/${value[0].image}`}
+                            src={`${imgurl}/${value[0].image}`}
                             alt="Tour"
                             className="w-10 h-10 rounded-lg object-cover border border-gray-200"
                         />
@@ -184,7 +190,11 @@ const Tours = () => {
 
             {/* Table */}
 
-            <MyTable columns={columns} data={allTour} />
+            <MyTable
+                key={tableRefreshKey}
+                columns={columns}
+                data={allTour}
+            />
 
             <AddToursForm
                 showForm={showAddForm}
