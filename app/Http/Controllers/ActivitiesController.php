@@ -21,19 +21,58 @@ class ActivitiesController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $activities
-        ]);
-    }
-
-     public function indexShowActivitySlug($slug)
-    {
-        $activities = Activities::where('slug', $slug)->firstOrFail();
-
-        return response()->json([
-            'status' => true,
             'data' => $activities,
         ]);
     }
+
+    /**
+     * INDEX - Get all activities (title, description, and first image only)
+     */
+    public function indexShow()
+    {
+        $activities = Activities::with(['images' => function ($query) {
+            $query->oldest()->limit(1);
+        }])
+            ->select('id', 'title', 'description', 'slug')
+            ->latest()
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'title' => $activity->title,
+                    'description' => $activity->description,
+                    'slug' => $activity->slug,
+                    'image' => $activity->images->first()?->image ?? null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $activities,
+        ]);
+    }
+
+    public function indexShowActivitySlug($slug)
+    {
+        $activity = Activities::with(['images', 'itineraries'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => $activity,
+        ]);
+    }
+
+    //  public function indexShowActivitySlug($slug)
+    // {
+    //     $activities = Activities::where('slug', $slug)->firstOrFail();
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $activities,
+    //     ]);
+    // }
 
     /**
      * STORE - Create activity with images + itineraries
@@ -97,7 +136,7 @@ class ActivitiesController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => $request->ip(),
-                'title' => 'Created activity: ' . $activity->title,
+                'title' => 'Created activity: '.$activity->title,
             ]);
 
             DB::commit();
@@ -105,7 +144,7 @@ class ActivitiesController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Activity created successfully',
-                'data' => $activity->load(['images', 'itineraries'])
+                'data' => $activity->load(['images', 'itineraries']),
             ]);
 
         } catch (\Exception $e) {
@@ -113,7 +152,7 @@ class ActivitiesController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -144,7 +183,7 @@ class ActivitiesController extends Controller
                 'description' => $request->description,
                 'includes' => $request->includes,
                 'excludes' => $request->excludes,
-                'slug' => Str::slug($request->title) . '-' . $activity->id,
+                'slug' => Str::slug($request->title).'-'.$activity->id,
             ]);
 
             // OPTIONAL: replace images
@@ -180,7 +219,7 @@ class ActivitiesController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => $request->ip(),
-                'title' => 'Updated activity: "' . $oldTitle . '" -> "' . $activity->title . '"',
+                'title' => 'Updated activity: "'.$oldTitle.'" -> "'.$activity->title.'"',
             ]);
 
             DB::commit();
@@ -188,7 +227,7 @@ class ActivitiesController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Activity updated successfully',
-                'data' => $activity->load(['images', 'itineraries'])
+                'data' => $activity->load(['images', 'itineraries']),
             ]);
 
         } catch (\Exception $e) {
@@ -196,7 +235,7 @@ class ActivitiesController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -223,14 +262,14 @@ class ActivitiesController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => request()->ip(),
-                'title' => 'Deleted activity: ' . $activityTitle,
+                'title' => 'Deleted activity: '.$activityTitle,
             ]);
 
             DB::commit();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Activity deleted successfully'
+                'message' => 'Activity deleted successfully',
             ]);
 
         } catch (\Exception $e) {
@@ -238,7 +277,7 @@ class ActivitiesController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

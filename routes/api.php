@@ -53,8 +53,11 @@ Route::get('/user', function (Request $request) {
 
     Route::get('/trekkings/{slug}', [TrekkingController::class, 'indexShowTrekkingSlug']);
 
-    Route::get('/activities', [ActivitiesController::class, 'index']);
+    Route::get('/activities', [ActivitiesController::class, 'indexShow']);
 
     Route::get('/activities/{slug}', [ActivitiesController::class, 'indexShowActivitySlug']);
 
     Route::get('/faqs', [FaqController::class, 'index']);
+
+
+    Route::get('/navbartours', [TourController::class, 'indexNavbar']);
