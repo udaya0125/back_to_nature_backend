@@ -33,6 +33,16 @@ class Activities extends Model
         return $this->hasMany(ActivityItinerary::class, 'activity_id'); // 👈 explicit FK
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id'); // 👈 explicit FK
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class, 'sub_category_id'); // 👈 explicit FK
+    }
+
     public function faqs()
     {
         return $this->hasMany(Faq::class);

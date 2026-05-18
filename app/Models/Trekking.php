@@ -38,6 +38,11 @@ class Trekking extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class);
+    }
+
     public function images()
     {
         return $this->hasMany(TrekkingImage::class);

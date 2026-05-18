@@ -60,4 +60,12 @@ Route::get('/user', function (Request $request) {
     Route::get('/faqs', [FaqController::class, 'index']);
 
 
+    // ############################################################################################
+    // API route to fetch Tours, Trekkings, and Activities for Navbar
+    // ############################################################################################
+
     Route::get('/navbartours', [TourController::class, 'indexNavbar']);
+
+    Route::get('/navbartrekkings', [TrekkingController::class, 'indexNavbar']);
+
+    Route::get('/navbaractivities', [ActivitiesController::class, 'indexNavbar']);

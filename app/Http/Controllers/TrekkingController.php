@@ -54,6 +54,31 @@ class TrekkingController extends Controller
         ]);
     }
 
+    /**
+ * Display all trekkings for navbar (title, slug, category, sub_category only)
+ */
+public function indexNavbar()
+{
+    $trekkings = Trekking::with(['category', 'subCategory'])
+        ->select('id', 'title', 'slug', 'category_id', 'sub_category_id')
+        ->latest()
+        ->get()
+        ->map(function ($trekking) {
+            return [
+                'id'           => $trekking->id,
+                'title'        => $trekking->title,
+                'slug'         => $trekking->slug,
+                'category'     => $trekking->category,
+                'sub_category' => $trekking->subCategory,
+            ];
+        });
+
+    return response()->json([
+        'success' => true,
+        'data'    => $trekkings,
+    ]);
+}
+
     public function indexShowTrekkingSlug($slug)
     {
         $trekking = Trekking::with(['category', 'images', 'itineraries'])

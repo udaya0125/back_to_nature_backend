@@ -52,6 +52,31 @@ class ActivitiesController extends Controller
         ]);
     }
 
+    /**
+     * Display all activities for navbar (title, slug, category, sub_category only)
+     */
+    public function indexNavbar()
+    {
+        $activities = Activities::with(['category', 'subCategory'])
+            ->select('id', 'title', 'slug', 'category_id', 'sub_category_id')
+            ->latest()
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'title' => $activity->title,
+                    'slug' => $activity->slug,
+                    'category' => $activity->category,
+                    'sub_category' => $activity->subCategory,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $activities,
+        ]);
+    }
+
     public function indexShowActivitySlug($slug)
     {
         $activity = Activities::with(['images', 'itineraries'])

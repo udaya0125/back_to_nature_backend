@@ -78,28 +78,28 @@ class TourController extends Controller
     }
 
     /**
- * Display all tours for navbar (title, slug, category only)
- */
-public function indexNavbar()
-{
-    $tours = Tour::with(['category'])
-        ->select('id', 'title', 'slug', 'category_id')
-        ->latest()
-        ->get()
-        ->map(function ($tour) {
-            return [
-                'id'       => $tour->id,
-                'title'    => $tour->title,
-                'slug'     => $tour->slug,
-                'category' => $tour->category,
-            ];
-        });
+     * Display all tours for navbar (title, slug, category only)
+     */
+    public function indexNavbar()
+    {
+        $tours = Tour::with(['category'])
+            ->select('id', 'title', 'slug', 'category_id')
+            ->latest()
+            ->get()
+            ->map(function ($tour) {
+                return [
+                    'id' => $tour->id,
+                    'title' => $tour->title,
+                    'slug' => $tour->slug,
+                    'category' => $tour->category,
+                ];
+            });
 
-    return response()->json([
-        'success' => true,
-        'data'    => $tours,
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'data' => $tours,
+        ]);
+    }
 
     /**
      * Store a new tour
