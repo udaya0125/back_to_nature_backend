@@ -1,0 +1,475 @@
+import axios from "axios";
+import { X, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import Select from "react-select";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+
+// Custom styles for react-select to match the design
+const customSelectStyles = {
+    control: (base, { isDisabled, isFocused }) => ({
+        ...base,
+        backgroundColor: isDisabled ? "#f9fafb" : "white",
+        borderColor: isFocused ? "#6366f1" : "#e5e7eb",
+        borderWidth: "1px",
+        borderRadius: "0.5rem",
+        padding: "0.125rem 0",
+        boxShadow: isFocused ? "0 0 0 2px rgba(99, 102, 241, 0.2)" : "none",
+        "&:hover": {
+            borderColor: isFocused ? "#6366f1" : "#d1d5db",
+        },
+    }),
+    option: (base, { isFocused, isSelected }) => ({
+        ...base,
+        backgroundColor: isSelected
+            ? "#6366f1"
+            : isFocused
+            ? "#eef2ff"
+            : "white",
+        color: isSelected ? "white" : "#374151",
+        cursor: "pointer",
+        "&:active": {
+            backgroundColor: "#6366f1",
+        },
+    }),
+    placeholder: (base) => ({
+        ...base,
+        color: "#9ca3af",
+        fontSize: "0.875rem",
+    }),
+    singleValue: (base) => ({
+        ...base,
+        color: "#374151",
+        fontSize: "0.875rem",
+    }),
+    dropdownIndicator: (base) => ({
+        ...base,
+        color: "#9ca3af",
+        "&:hover": {
+            color: "#6b7280",
+        },
+    }),
+    indicatorSeparator: (base) => ({
+        ...base,
+        backgroundColor: "#e5e7eb",
+    }),
+    loadingIndicator: (base) => ({
+        ...base,
+        color: "#6366f1",
+    }),
+};
+
+// Quill modules configuration
+const quillModules = {
+    toolbar: [
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ indent: "-1" }, { indent: "+1" }],
+        [{ align: [] }],
+        ["link", "clean"],
+        ["blockquote", "code-block"],
+    ],
+};
+
+const quillFormats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "bullet",
+    "indent",
+    "align",
+    "link",
+    "blockquote",
+    "code-block",
+];
+
+const EditFAQForm = ({
+    showForm,
+    setShowForm,
+    editingFaq,
+    setEditingFaq,
+    handleUpdate,
+    setReloadTrigger,
+}) => {
+    const [submitting, setSubmitting] = useState(false);
+
+    // Step 1: Category
+    const [categoryId, setCategoryId] = useState(null);
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(false);
+
+    // Step 2: Item (tour / trekking / activity) filtered by category
+    const [itemId, setItemId] = useState(null);
+    const [items, setItems] = useState([]);
+    const [loadingItems, setLoadingItems] = useState(false);
+
+    // The resolved category type (derived from category name)
+    const [categoryType, setCategoryType] = useState(""); // "tour" | "trekking" | "activity" | ""
+
+    // Single Q&A pair for editing
+    const [question, setQuestion] = useState("");
+    const [answer, setAnswer] = useState("");
+
+    // Fetch categories once on mount
+    useEffect(() => {
+        setLoadingCategories(true);
+        axios
+            .get(route("ourcategories.index"))
+            .then((res) => {
+                const data = res.data?.data ?? res.data;
+                setCategories(Array.isArray(data) ? data : []);
+            })
+            .catch(console.error)
+            .finally(() => setLoadingCategories(false));
+    }, []);
+
+    // When category changes → determine type → fetch matching items
+    useEffect(() => {
+        // Don't reset if we're still loading or if we're setting up from editingFaq
+        if (!categoryId) {
+            setItemId(null);
+            setItems([]);
+            setCategoryType("");
+            return;
+        }
+
+        const selected = categories.find((c) => String(c.id) === String(categoryId));
+        if (!selected) return;
+
+        // Derive type from category name (case-insensitive)
+        const nameLower = selected.name.toLowerCase();
+        let type = "";
+        if (nameLower.includes("tour")) type = "tour";
+        else if (nameLower.includes("trek")) type = "trekking";
+        else if (nameLower.includes("activ")) type = "activity";
+
+        setCategoryType(type);
+
+        if (!type) return;
+
+        // Fetch items of this type, filtered by category_id on the backend
+        setLoadingItems(true);
+        const routeMap = {
+            tour: "ourtours.index",
+            trekking: "ourtrekkings.index",
+            activity: "ouractivities.index",
+        };
+
+        axios
+            .get(route(routeMap[type]))
+            .then((res) => {
+                const data = res.data?.data ?? res.data;
+                const all = Array.isArray(data) ? data : [];
+                // Filter by category_id if the items have that field
+                const filtered = all.filter(
+                    (item) =>
+                        !item.category_id || String(item.category_id) === String(categoryId),
+                );
+                setItems(filtered.length > 0 ? filtered : all);
+            })
+            .catch(console.error)
+            .finally(() => setLoadingItems(false));
+    }, [categoryId, categories]);
+
+    // Populate when editing
+    useEffect(() => {
+        if (editingFaq) {
+            // Set category
+            const catId = editingFaq.category_id ? String(editingFaq.category_id) : null;
+            setCategoryId(catId);
+            
+            // Set question and answer
+            setQuestion(editingFaq.question ?? "");
+            setAnswer(editingFaq.answer ?? "");
+
+            // Determine category type from the category
+            if (catId) {
+                const selectedCategory = categories.find((c) => String(c.id) === catId);
+                if (selectedCategory) {
+                    const nameLower = selectedCategory.name.toLowerCase();
+                    let type = "";
+                    if (nameLower.includes("tour")) type = "tour";
+                    else if (nameLower.includes("trek")) type = "trekking";
+                    else if (nameLower.includes("activ")) type = "activity";
+                    setCategoryType(type);
+                }
+            }
+
+            // Set item id from whichever association exists
+            let itemIdentifier = null;
+            if (editingFaq.tour_id) {
+                itemIdentifier = String(editingFaq.tour_id);
+                setCategoryType("tour");
+            } else if (editingFaq.trekking_id) {
+                itemIdentifier = String(editingFaq.trekking_id);
+                setCategoryType("trekking");
+            } else if (editingFaq.activity_id) {
+                itemIdentifier = String(editingFaq.activity_id);
+                setCategoryType("activity");
+            }
+            setItemId(itemIdentifier);
+
+            setShowForm(true);
+        } else {
+            resetForm();
+        }
+    }, [editingFaq, categories]);
+
+    const resetForm = () => {
+        setCategoryId(null);
+        setItemId(null);
+        setItems([]);
+        setCategoryType("");
+        setQuestion("");
+        setAnswer("");
+    };
+
+    // Build shared payload
+    const buildBasePayload = () => {
+        const payload = {};
+        if (categoryId) payload.category_id = categoryId;
+        if (categoryType === "tour" && itemId) payload.tour_id = itemId;
+        if (categoryType === "trekking" && itemId) payload.trekking_id = itemId;
+        if (categoryType === "activity" && itemId) payload.activity_id = itemId;
+        return payload;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!question.trim() || !answer.trim()) return;
+
+        try {
+            setSubmitting(true);
+            const formData = new FormData();
+            Object.entries({
+                ...buildBasePayload(),
+                question,
+                answer,
+            }).forEach(([k, v]) => formData.append(k, v));
+            formData.append("_method", "PUT");
+            await handleUpdate(formData, editingFaq.id);
+            setReloadTrigger((prev) => !prev);
+            resetForm();
+            setShowForm(false);
+            setEditingFaq(null);
+        } catch (err) {
+            console.log("Status:", err.response?.status);
+            console.log("Error data:", err.response?.data);
+            console.log("Validation errors:", err.response?.data?.errors);
+            console.log("Message:", err.response?.data?.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleClose = () => {
+        setShowForm(false);
+        setEditingFaq(null);
+        resetForm();
+    };
+
+    // Format options for react-select
+    const categoryOptions = categories.map((cat) => ({
+        value: String(cat.id),
+        label: cat.name ?? cat.title,
+    }));
+
+    const itemOptions = items.map((item) => ({
+        value: String(item.id),
+        label: item.name ?? item.title,
+    }));
+
+    const selectedCategoryOption = categoryOptions.find(
+        (opt) => opt.value === categoryId
+    );
+    const selectedItemOption = itemOptions.find((opt) => opt.value === itemId);
+
+    if (!showForm) return null;
+
+    return (
+        <>
+            <style>
+                {`
+                .quill-faq-answer .ql-container {
+                    min-height: 120px;
+                    max-height: 250px;
+                    overflow-y: auto;
+                    font-size: 14px;
+                    border-bottom-left-radius: 8px;
+                    border-bottom-right-radius: 8px;
+                }
+
+                .quill-faq-answer .ql-editor {
+                    min-height: 120px;
+                }
+
+                .quill-faq-answer .ql-toolbar.ql-snow {
+                    border-top-left-radius: 8px;
+                    border-top-right-radius: 8px;
+                    border-color: #e5e7eb;
+                }
+
+                .quill-faq-answer .ql-container.ql-snow {
+                    border-color: #e5e7eb;
+                }
+
+                .quill-faq-answer .ql-toolbar.ql-snow + .ql-container.ql-snow {
+                    border-top: none;
+                }
+                `}
+            </style>
+
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl flex flex-col max-h-[92vh]">
+                    {/* Header */}
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 shrink-0">
+                        <h2 className="text-xl font-bold text-gray-800">
+                            Edit FAQ
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex flex-col flex-1 overflow-hidden"
+                    >
+                        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+                            {/* Category and Item in same row - flex layout */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Step 1: Category - React Select */}
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-gray-700">
+                                        Category <span className="text-red-500 ml-1">*</span>
+                                    </label>
+                                    <Select
+                                        options={categoryOptions}
+                                        value={selectedCategoryOption}
+                                        onChange={(option) => {
+                                            setCategoryId(option?.value || null);
+                                            // Reset item when category changes
+                                            setItemId(null);
+                                        }}
+                                        placeholder={
+                                            loadingCategories ? "Loading..." : "Select a category"
+                                        }
+                                        isDisabled={loadingCategories}
+                                        isLoading={loadingCategories}
+                                        styles={customSelectStyles}
+                                        className="react-select-container"
+                                        classNamePrefix="react-select"
+                                        isClearable
+                                    />
+                                </div>
+
+                                {/* Step 2: Specific item — appears after category is chosen */}
+                                {categoryId && categoryType && (
+                                    <div className="space-y-1.5">
+                                        <label className="block text-sm font-semibold text-gray-700">
+                                            {categoryType === "tour" && "Select Tour"}
+                                            {categoryType === "trekking" && "Select Trekking"}
+                                            {categoryType === "activity" && "Select Activity"}
+                                        </label>
+                                        <Select
+                                            options={itemOptions}
+                                            value={selectedItemOption}
+                                            onChange={(option) =>
+                                                setItemId(option?.value || null)
+                                            }
+                                            placeholder={
+                                                loadingItems
+                                                    ? "Loading..."
+                                                    : `Select a ${categoryType}`
+                                            }
+                                            isDisabled={!categoryType || loadingItems}
+                                            isLoading={loadingItems}
+                                            styles={customSelectStyles}
+                                            className="react-select-container"
+                                            classNamePrefix="react-select"
+                                            isClearable
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Warning if category name doesn't map to a known type */}
+                            {categoryId && !loadingItems && !categoryType && (
+                                <p className="text-xs text-amber-500 flex items-center gap-1.5">
+                                    <span>⚠</span>
+                                    Category name doesn't match Tour, Trekking, or
+                                    Activity — only category will be saved.
+                                </p>
+                            )}
+
+                            {/* Q&A block - Single pair for editing */}
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-gray-700">
+                                        Question <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={question}
+                                        onChange={(e) => setQuestion(e.target.value)}
+                                        required
+                                        placeholder="e.g. What is included in the package?"
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm"
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-gray-700">
+                                        Answer <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="quill-faq-answer">
+                                        <ReactQuill
+                                            theme="snow"
+                                            value={answer}
+                                            onChange={setAnswer}
+                                            modules={quillModules}
+                                            formats={quillFormats}
+                                            placeholder="Write a clear, helpful answer..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+                            <button
+                                type="button"
+                                onClick={handleClose}
+                                className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition flex items-center gap-2 min-w-[120px] justify-center"
+                            >
+                                {submitting && (
+                                    <Loader2 size={15} className="animate-spin" />
+                                )}
+                                {submitting ? "Updating..." : "Update FAQ"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default EditFAQForm;

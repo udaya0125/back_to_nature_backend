@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Tour;
 use App\Models\TourImage;
 use App\Models\TourItinerary;
-use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -24,8 +24,57 @@ class TourController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $tours
+            'data' => $tours,
         ], 200);
+    }
+
+    /**
+     * Display all tours (title, description, and first image only)
+     */
+    public function indexShow()
+    {
+        $tours = Tour::with(['images' => function ($query) {
+            $query->oldest()->limit(1);
+        }])
+            ->select('id', 'title', 'description', 'slug')
+            ->latest()
+            ->get()
+            ->map(function ($tour) {
+                return [
+                    'id' => $tour->id,
+                    'title' => $tour->title,
+                    'description' => $tour->description,
+                    'slug' => $tour->slug,
+                    'image' => $tour->images->first()?->image ?? null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $tours,
+        ], 200);
+    }
+
+    // public function indexShowTourSlug($slug)
+    // {
+    //     $tours = Tour::where('slug', $slug)->firstOrFail();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $tours,
+    //     ]);
+    // }
+
+    public function indexShowTourSlug($slug)
+    {
+        $tours = Tour::with(['category', 'images', 'itineraries'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => $tours,
+        ]);
     }
 
     /**
@@ -62,7 +111,7 @@ class TourController extends Controller
                 'description' => $request->description,
                 'includes' => $request->includes,
                 'excludes' => $request->excludes,
-                'slug' => Str::slug($request->title)
+                'slug' => Str::slug($request->title),
             ]);
 
             /**
@@ -76,7 +125,7 @@ class TourController extends Controller
 
                     TourImage::create([
                         'tour_id' => $tour->id,
-                        'image' => $path
+                        'image' => $path,
                     ]);
                 }
             }
@@ -92,7 +141,7 @@ class TourController extends Controller
                         'tour_id' => $tour->id,
                         'day' => $item['day'],
                         'title' => $item['title'],
-                        'description' => $item['description']
+                        'description' => $item['description'],
                     ]);
                 }
             }
@@ -100,7 +149,7 @@ class TourController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => $request->ip(),
-                'title' => 'Created tour: ' . $tour->title,
+                'title' => 'Created tour: '.$tour->title,
             ]);
 
             DB::commit();
@@ -108,7 +157,7 @@ class TourController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Tour created successfully',
-                'data' => $tour->load(['images', 'itineraries'])
+                'data' => $tour->load(['images', 'itineraries']),
             ], 201);
 
         } catch (\Exception $e) {
@@ -117,7 +166,7 @@ class TourController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -172,7 +221,7 @@ class TourController extends Controller
 
                     TourImage::create([
                         'tour_id' => $tour->id,
-                        'image' => $path
+                        'image' => $path,
                     ]);
                 }
             }
@@ -192,7 +241,7 @@ class TourController extends Controller
                         'tour_id' => $tour->id,
                         'day' => $item['day'],
                         'title' => $item['title'],
-                        'description' => $item['description']
+                        'description' => $item['description'],
                     ]);
                 }
             }
@@ -200,7 +249,7 @@ class TourController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => $request->ip(),
-                'title' => 'Updated tour: "' . $oldTitle . '" -> "' . $tour->title . '"',
+                'title' => 'Updated tour: "'.$oldTitle.'" -> "'.$tour->title.'"',
             ]);
 
             DB::commit();
@@ -208,7 +257,7 @@ class TourController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Tour updated successfully',
-                'data' => $tour->load(['images', 'itineraries'])
+                'data' => $tour->load(['images', 'itineraries']),
             ], 200);
 
         } catch (\Exception $e) {
@@ -217,7 +266,7 @@ class TourController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -258,14 +307,14 @@ class TourController extends Controller
             ActivityLog::create([
                 'name' => auth()->user()->name ?? 'System',
                 'ip_address' => request()->ip(),
-                'title' => 'Deleted tour: ' . $tourTitle,
+                'title' => 'Deleted tour: '.$tourTitle,
             ]);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Tour deleted successfully'
+                'message' => 'Tour deleted successfully',
             ], 200);
 
         } catch (\Exception $e) {
@@ -274,7 +323,7 @@ class TourController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

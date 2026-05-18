@@ -7,6 +7,7 @@ use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\TrekkingController;
 use App\Http\Controllers\ActivitiesController;
+use App\Http\Controllers\FaqController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -35,11 +36,13 @@ Route::get('/user', function (Request $request) {
     // ###########################################################################################
 
 
-    Route::get('/tours', [TourController::class, 'index']);
+    Route::get('/tours', [TourController::class, 'indexShow']);
 
     // ###########################################################################################
     // API route to fetch Trekkings
     // ###########################################################################################
+
+    Route::get('/tours/{slug}', [TourController::class, 'indexShowTourSlug']);
 
 
     Route::get('/trekkings', [TrekkingController::class, 'index']);
@@ -48,4 +51,10 @@ Route::get('/user', function (Request $request) {
     // API route to fetch Activities
     // ############################################################################################
 
+    Route::get('/trekkings/{slug}', [TrekkingController::class, 'indexShowTrekkingSlug']);
+
     Route::get('/activities', [ActivitiesController::class, 'index']);
+
+    Route::get('/activities/{slug}', [ActivitiesController::class, 'indexShowActivitySlug']);
+
+    Route::get('/faqs', [FaqController::class, 'index']);

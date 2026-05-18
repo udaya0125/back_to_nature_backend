@@ -25,6 +25,16 @@ class ActivitiesController extends Controller
         ]);
     }
 
+     public function indexShowActivitySlug($slug)
+    {
+        $activities = Activities::where('slug', $slug)->firstOrFail();
+
+        return response()->json([
+            'status' => true,
+            'data' => $activities,
+        ]);
+    }
+
     /**
      * STORE - Create activity with images + itineraries
      */

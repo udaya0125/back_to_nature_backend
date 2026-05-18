@@ -1,6 +1,7 @@
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import { Link } from "@inertiajs/react";
-import { Image, Newspaper, UserCog } from "lucide-react";
+import { FaMountain, FaHiking, FaRunning, FaUsers } from "react-icons/fa";
+import { MdCategory, MdOutlineCategory } from "react-icons/md";
 import React from "react";
 
 const Dashboard = () => {
@@ -8,40 +9,41 @@ const Dashboard = () => {
         {
             title: "Category",
             breadcrumb: "Category",
-            icon: Image,
+            icon: MdCategory,
             link: "/category",
         },
         {
             title: "Sub Category",
             breadcrumb: "Sub Category",
-            icon: Newspaper,
+            icon: MdOutlineCategory,
             link: "/sub-category",
         },
         {
             title: "Tour",
             breadcrumb: "Tour",
-            icon: Newspaper,
+            icon: FaMountain,
             link: "/tours",
         },
         {
             title: "Trekking",
             breadcrumb: "Trekking",
-            icon: Newspaper,
+            icon: FaHiking,
             link: "/trekking",
         },
         {
             title: "Activities",
             breadcrumb: "Activities",
-            icon: Newspaper,
+            icon: FaRunning,
             link: "/activities",
         },
         {
             title: "User Management",
             breadcrumb: "User Management",
-            icon: UserCog,
+            icon: FaUsers,
             link: "/user-management",
         },
     ];
+
     return (
         <>
             <AdminWrapper>
@@ -67,24 +69,24 @@ const Dashboard = () => {
                                                 Home
                                             </span>
                                             <span className="text-sm text-gray-500">
-                                                | {card.breadcrumb}{" "}
+                                                | {card.breadcrumb}
                                             </span>
                                         </div>
 
                                         {/* Card Content */}
                                         <div className="flex items-center gap-6">
                                             <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gray-100">
-                                                <Icon className="w-7 h-7 text-gray-700" />
+                                                <Icon className="w-7 h-7 text-gray-700" size={28} />
                                             </div>
 
                                             <h3 className="text-lg font-medium text-gray-800">
-                                                {card.title}{" "}
+                                                {card.title}
                                             </h3>
                                         </div>
                                     </div>
                                 </Link>
                             );
-                        })}{" "}
+                        })}
                     </div>
                 </div>
             </AdminWrapper>

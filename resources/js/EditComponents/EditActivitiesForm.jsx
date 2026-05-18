@@ -111,7 +111,7 @@ const EditActivitiesForm = ({
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         setSelectedImages((prev) => [...prev, ...files]);
-        
+
         const previews = files.map((f) => URL.createObjectURL(f));
         setImagePreviews((prev) => [...prev, ...previews]);
     };
@@ -308,7 +308,8 @@ const EditActivitiesForm = ({
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Category <span className="text-red-500">*</span>
+                                    Category{" "}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <select
                                     name="category_id"
@@ -339,7 +340,9 @@ const EditActivitiesForm = ({
                                     disabled={!activitiesForm.category_id}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
                                 >
-                                    <option value="">Select Sub Category</option>
+                                    <option value="">
+                                        Select Sub Category
+                                    </option>
                                     {subCategories.map((sub) => (
                                         <option key={sub.id} value={sub.id}>
                                             {sub.name}
@@ -352,13 +355,19 @@ const EditActivitiesForm = ({
                         {/* Description - Rich Text Editor */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Description <span className="text-red-500">*</span>
+                                Description{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <div className="quill-wrapper">
                                 <ReactQuill
                                     theme="snow"
                                     value={activitiesForm.description}
-                                    onChange={(value) => handleRichTextChange("description", value)}
+                                    onChange={(value) =>
+                                        handleRichTextChange(
+                                            "description",
+                                            value,
+                                        )
+                                    }
                                     modules={quillModules}
                                     formats={quillFormats}
                                     placeholder="Describe this activity in detail..."
@@ -375,7 +384,9 @@ const EditActivitiesForm = ({
                                 <ReactQuill
                                     theme="snow"
                                     value={activitiesForm.includes}
-                                    onChange={(value) => handleRichTextChange("includes", value)}
+                                    onChange={(value) =>
+                                        handleRichTextChange("includes", value)
+                                    }
                                     modules={quillModules}
                                     formats={quillFormats}
                                     placeholder="What's included..."
@@ -392,7 +403,9 @@ const EditActivitiesForm = ({
                                 <ReactQuill
                                     theme="snow"
                                     value={activitiesForm.excludes}
-                                    onChange={(value) => handleRichTextChange("excludes", value)}
+                                    onChange={(value) =>
+                                        handleRichTextChange("excludes", value)
+                                    }
                                     modules={quillModules}
                                     formats={quillFormats}
                                     placeholder="What's excluded..."
@@ -412,12 +425,15 @@ const EditActivitiesForm = ({
                                 onChange={handleImageChange}
                                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
-                            
+
                             {/* New image previews */}
                             {imagePreviews.length > 0 && (
                                 <div className="mt-2 flex flex-wrap gap-2">
                                     {imagePreviews.map((url, index) => (
-                                        <div key={index} className="relative group">
+                                        <div
+                                            key={index}
+                                            className="relative group"
+                                        >
                                             <img
                                                 src={url}
                                                 alt={`preview-${index}`}
@@ -425,7 +441,9 @@ const EditActivitiesForm = ({
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => removeSelectedImage(index)}
+                                                onClick={() =>
+                                                    removeSelectedImage(index)
+                                                }
                                                 className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition"
                                             >
                                                 <X size={12} />
@@ -434,12 +452,13 @@ const EditActivitiesForm = ({
                                     ))}
                                 </div>
                             )}
-                            
+
                             {/* Existing images (edit mode) */}
                             {editingActivity?.images?.length > 0 && (
                                 <div className="mt-2">
                                     <p className="text-xs text-gray-500 mb-1">
-                                        Existing images (adding new images won't remove these):
+                                        Existing images (adding new images won't
+                                        remove these):
                                     </p>
                                     <div className="flex flex-wrap gap-2">
                                         {editingActivity.images.map((img) => (
@@ -486,7 +505,9 @@ const EditActivitiesForm = ({
                                         <div className="flex justify-end mb-2">
                                             <button
                                                 type="button"
-                                                onClick={() => removeItinerary(index)}
+                                                onClick={() =>
+                                                    removeItinerary(index)
+                                                }
                                                 className="text-red-400 hover:text-red-600 transition"
                                             >
                                                 <Trash2 size={16} />
@@ -536,6 +557,16 @@ const EditActivitiesForm = ({
                                     </div>
                                 ))}
                             </div>
+                            {itineraries.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={addItinerary}
+                                    className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 font-medium hover:border-indigo-300 hover:text-indigo-500 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={15} />
+                                    Add another itinerary item
+                                </button>
+                            )}
                         </div>
 
                         {/* Actions */}

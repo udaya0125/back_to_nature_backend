@@ -283,6 +283,34 @@ const AdminSideBar = ({
                             </div>
                         )}
                     </Link>
+
+
+                    {/* FQA Link */}
+                    <Link
+                        href="/faqs"
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${isActive("/faqs") ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                        `}
+                        title={isCollapsed ? "FAQ" : ""}
+                    >
+                        <Footprints
+                            className={`w-5 h-5 ${isActive("/faqs") ? "text-blue-600" : "text-gray-500 group-hover:text-blue-600"}`}
+                        />
+
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                FAQ
+                            </span>
+                        )}
+
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 text-sm bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                FAQ
+                            </div>
+                        )}
+                    </Link>
                     {/* Activity Logs Link */}
                     <Link
                         href="/activity-logs"

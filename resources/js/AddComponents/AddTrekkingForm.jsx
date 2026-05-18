@@ -38,7 +38,7 @@ const AddTrekkingForm = ({
 
     // Derived sub-categories based on selected category
     const selectedCategory = allCategory.find(
-        (c) => String(c.id) === String(formData.category_id)
+        (c) => String(c.id) === String(formData.category_id),
     );
     const subCategories = selectedCategory?.sub_categories || [];
 
@@ -155,8 +155,8 @@ const AddTrekkingForm = ({
     const handleItineraryChange = (index, field, value) => {
         setItineraries((prev) =>
             prev.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
-            )
+                i === index ? { ...item, [field]: value } : item,
+            ),
         );
     };
 
@@ -164,14 +164,15 @@ const AddTrekkingForm = ({
     const validate = () => {
         const newErrors = {};
         if (!formData.title.trim()) newErrors.title = "Title is required.";
-        if (!formData.category_id) newErrors.category_id = "Please select a category.";
-        
+        if (!formData.category_id)
+            newErrors.category_id = "Please select a category.";
+
         const stripHtml = (html) => {
             const tmp = document.createElement("div");
             tmp.innerHTML = html;
             return tmp.textContent || tmp.innerText || "";
         };
-        
+
         if (!stripHtml(formData.description).trim()) {
             newErrors.description = "Description is required.";
         }
@@ -300,7 +301,10 @@ const AddTrekkingForm = ({
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-indigo-100 rounded-lg">
-                                <Mountain size={18} className="text-indigo-600" />
+                                <Mountain
+                                    size={18}
+                                    className="text-indigo-600"
+                                />
                             </div>
                             <h2 className="text-xl font-bold text-gray-800">
                                 Add New Trekking
@@ -316,11 +320,15 @@ const AddTrekkingForm = ({
                     </div>
 
                     {/* Scrollable Body */}
-                    <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="overflow-y-auto flex-1 px-6 py-5 space-y-5"
+                    >
                         {/* Title */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Title <span className="text-red-400 ml-0.5">*</span>
+                                Title{" "}
+                                <span className="text-red-400 ml-0.5">*</span>
                             </label>
                             <input
                                 name="title"
@@ -333,14 +341,21 @@ const AddTrekkingForm = ({
                                         : "border-gray-200 focus:border-indigo-400"
                                 } bg-white placeholder-gray-400`}
                             />
-                            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                            {errors.title && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.title}
+                                </p>
+                            )}
                         </div>
 
                         {/* Category + Sub-category */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                    Category <span className="text-red-400 ml-0.5">*</span>
+                                    Category{" "}
+                                    <span className="text-red-400 ml-0.5">
+                                        *
+                                    </span>
                                 </label>
                                 <div className="relative">
                                     <select
@@ -353,16 +368,25 @@ const AddTrekkingForm = ({
                                                 : "border-gray-200 focus:border-indigo-400"
                                         } bg-white`}
                                     >
-                                        <option value="">Select category</option>
+                                        <option value="">
+                                            Select category
+                                        </option>
                                         {allCategory.map((cat) => (
                                             <option key={cat.id} value={cat.id}>
                                                 {cat.name}
                                             </option>
                                         ))}
                                     </select>
-                                    <ChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    <ChevronDown
+                                        size={15}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                                    />
                                 </div>
-                                {errors.category_id && <p className="text-red-500 text-xs mt-1">{errors.category_id}</p>}
+                                {errors.category_id && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.category_id}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -392,9 +416,16 @@ const AddTrekkingForm = ({
                                             </option>
                                         ))}
                                     </select>
-                                    <ChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    <ChevronDown
+                                        size={15}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                                    />
                                 </div>
-                                {errors.sub_category_id && <p className="text-red-500 text-xs mt-1">{errors.sub_category_id}</p>}
+                                {errors.sub_category_id && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.sub_category_id}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -404,7 +435,9 @@ const AddTrekkingForm = ({
                                 Price (USD)
                             </label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">$</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">
+                                    $
+                                </span>
                                 <input
                                     name="price"
                                     type="number"
@@ -420,26 +453,38 @@ const AddTrekkingForm = ({
                                     } bg-white placeholder-gray-400`}
                                 />
                             </div>
-                            {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+                            {errors.price && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.price}
+                                </p>
+                            )}
                         </div>
 
                         {/* Description */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Description <span className="text-red-400 ml-0.5">*</span>
+                                Description{" "}
+                                <span className="text-red-400 ml-0.5">*</span>
                             </label>
                             <div className="quill-wrapper">
                                 <ReactQuill
                                     theme="snow"
                                     value={formData.description}
-                                    onChange={(value) => handleRichTextChange("description", value)}
+                                    onChange={(value) =>
+                                        handleRichTextChange(
+                                            "description",
+                                            value,
+                                        )
+                                    }
                                     modules={quillModules}
                                     formats={quillFormats}
                                     placeholder="Describe this trek in detail..."
                                 />
                             </div>
                             {errors.description && (
-                                <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.description}
+                                </p>
                             )}
                         </div>
 
@@ -452,13 +497,19 @@ const AddTrekkingForm = ({
                                 <ReactQuill
                                     theme="snow"
                                     value={formData.includes}
-                                    onChange={(value) => handleRichTextChange("includes", value)}
+                                    onChange={(value) =>
+                                        handleRichTextChange("includes", value)
+                                    }
                                     modules={quillModules}
                                     formats={quillFormats}
                                     placeholder="What's included in this trek..."
                                 />
                             </div>
-                            {errors.includes && <p className="text-red-500 text-xs mt-1">{errors.includes}</p>}
+                            {errors.includes && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.includes}
+                                </p>
+                            )}
                         </div>
 
                         {/* Excludes */}
@@ -470,13 +521,19 @@ const AddTrekkingForm = ({
                                 <ReactQuill
                                     theme="snow"
                                     value={formData.excludes}
-                                    onChange={(value) => handleRichTextChange("excludes", value)}
+                                    onChange={(value) =>
+                                        handleRichTextChange("excludes", value)
+                                    }
                                     modules={quillModules}
                                     formats={quillFormats}
                                     placeholder="What's excluded from this trek..."
                                 />
                             </div>
-                            {errors.excludes && <p className="text-red-500 text-xs mt-1">{errors.excludes}</p>}
+                            {errors.excludes && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.excludes}
+                                </p>
+                            )}
                         </div>
 
                         {/* Images */}
@@ -496,7 +553,9 @@ const AddTrekkingForm = ({
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => removeNewImage(i)}
+                                                onClick={() =>
+                                                    removeNewImage(i)
+                                                }
                                                 className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
                                                 <X size={11} />
@@ -507,7 +566,10 @@ const AddTrekkingForm = ({
                             )}
 
                             <label className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/40 transition-colors text-sm text-gray-500 w-fit">
-                                <ImagePlus size={17} className="text-indigo-400" />
+                                <ImagePlus
+                                    size={17}
+                                    className="text-indigo-400"
+                                />
                                 <span>Upload images</span>
                                 <input
                                     type="file"
@@ -518,7 +580,9 @@ const AddTrekkingForm = ({
                                 />
                             </label>
                             {errors["images.0"] && (
-                                <p className="text-red-500 text-xs mt-1">{errors["images.0"]}</p>
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors["images.0"]}
+                                </p>
                             )}
                         </div>
 
@@ -540,7 +604,8 @@ const AddTrekkingForm = ({
 
                             {itineraries.length === 0 ? (
                                 <p className="text-sm text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl">
-                                    No itinerary added yet. Click "Add Day" to start.
+                                    No itinerary added yet. Click "Add Day" to
+                                    start.
                                 </p>
                             ) : (
                                 <div className="space-y-4">
@@ -552,7 +617,11 @@ const AddTrekkingForm = ({
                                             <div className="flex justify-end mb-2">
                                                 <button
                                                     type="button"
-                                                    onClick={() => removeItineraryRow(index)}
+                                                    onClick={() =>
+                                                        removeItineraryRow(
+                                                            index,
+                                                        )
+                                                    }
                                                     className="text-red-400 hover:text-red-600 transition"
                                                 >
                                                     <Trash2 size={16} />
@@ -571,7 +640,7 @@ const AddTrekkingForm = ({
                                                             handleItineraryChange(
                                                                 index,
                                                                 "title",
-                                                                e.target.value
+                                                                e.target.value,
                                                             )
                                                         }
                                                         required
@@ -580,9 +649,15 @@ const AddTrekkingForm = ({
                                                     />
                                                 </div>
                                             </div>
-                                            {errors[`itinerary_title_${index}`] && (
+                                            {errors[
+                                                `itinerary_title_${index}`
+                                            ] && (
                                                 <p className="text-red-500 text-xs mb-2 -mt-2">
-                                                    {errors[`itinerary_title_${index}`]}
+                                                    {
+                                                        errors[
+                                                            `itinerary_title_${index}`
+                                                        ]
+                                                    }
                                                 </p>
                                             )}
 
@@ -594,7 +669,7 @@ const AddTrekkingForm = ({
                                                         handleItineraryChange(
                                                             index,
                                                             "description",
-                                                            value
+                                                            value,
                                                         )
                                                     }
                                                     modules={quillModules}
@@ -602,14 +677,30 @@ const AddTrekkingForm = ({
                                                     placeholder="Describe what happens this day..."
                                                 />
                                             </div>
-                                            {errors[`itinerary_desc_${index}`] && (
+                                            {errors[
+                                                `itinerary_desc_${index}`
+                                            ] && (
                                                 <p className="text-red-500 text-xs mt-1">
-                                                    {errors[`itinerary_desc_${index}`]}
+                                                    {
+                                                        errors[
+                                                            `itinerary_desc_${index}`
+                                                        ]
+                                                    }
                                                 </p>
                                             )}
                                         </div>
                                     ))}
                                 </div>
+                            )}
+                            {itineraries.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={addItineraryRow}
+                                    className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 font-medium hover:border-indigo-300 hover:text-indigo-500 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={15} />
+                                    Add another itinerary item
+                                </button>
                             )}
                         </div>
                     </form>
@@ -632,7 +723,10 @@ const AddTrekkingForm = ({
                         >
                             {submitting ? (
                                 <>
-                                    <Loader2 size={15} className="animate-spin" />
+                                    <Loader2
+                                        size={15}
+                                        className="animate-spin"
+                                    />
                                     <span>Creating…</span>
                                 </>
                             ) : (

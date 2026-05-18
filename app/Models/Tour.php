@@ -41,4 +41,8 @@ class Tour extends Model
     {
         return $this->hasMany(TourItinerary::class);
     }
+    public function faqs()
+    {
+        return $this->hasMany(Faq::class);
+    }
 }

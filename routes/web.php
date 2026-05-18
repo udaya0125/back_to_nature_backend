@@ -11,6 +11,7 @@ use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\ActivitiesController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\TrekkingController;
+use App\Http\Controllers\FaqController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -131,6 +132,16 @@ Route::middleware('auth')->group(function () {
     //####################################
 
     Route::get('/ourlogs', [ActivityLogsController::class, 'index'])->name('ourlogs.index');  
+
+
+    Route::get("/faqs",function(){
+        return Inertia::render("AdminPages/FAQ");
+    });
+
+    Route::get('/ourfaqs', [FaqController::class, 'index'])->name('ourfaqs.index');
+    Route::post('/ourfaqs', [FaqController::class, 'store'])->name('ourfaqs.store');
+    Route::put('/ourfaqs/{id}', [FaqController::class, 'update'])->name('ourfaqs.update');
+    Route::delete('/ourfaqs/{id}', [FaqController::class, 'destroy'])->name('ourfaqs.destroy');
 
 });
 

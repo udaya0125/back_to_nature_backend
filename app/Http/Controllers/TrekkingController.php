@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Trekking;
 use App\Models\ActivityLog;
+use App\Models\Trekking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,12 +17,22 @@ class TrekkingController extends Controller
         $trekkings = Trekking::with([
             'category',
             'images',
-            'itineraries'
+            'itineraries',
         ])->latest()->get();
 
         return response()->json([
             'success' => true,
-            'data' => $trekkings
+            'data' => $trekkings,
+        ]);
+    }
+
+    public function indexShowTrekkingSlug($slug)
+    {
+        $trekkings = Trekking::where('slug', $slug)->firstOrFail();
+
+        return response()->json([
+            'status' => true,
+            'data' => $trekkings,
         ]);
     }
 
@@ -71,7 +81,7 @@ class TrekkingController extends Controller
                 $path = $image->store('trekkings', 'public');
 
                 $trekking->images()->create([
-                    'image' => $path
+                    'image' => $path,
                 ]);
             }
         }
@@ -94,13 +104,13 @@ class TrekkingController extends Controller
         ActivityLog::create([
             'name' => auth()->user()->name ?? 'System',
             'ip_address' => $request->ip(),
-            'title' => 'Created trekking: ' . $trekking->title,
+            'title' => 'Created trekking: '.$trekking->title,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Trekking created successfully',
-            'data' => $trekking->load('images', 'itineraries')
+            'data' => $trekking->load('images', 'itineraries'),
         ], 201);
     }
 
@@ -150,7 +160,7 @@ class TrekkingController extends Controller
                 $path = $image->store('trekkings', 'public');
 
                 $trekking->images()->create([
-                    'image' => $path
+                    'image' => $path,
                 ]);
             }
         }
@@ -177,13 +187,13 @@ class TrekkingController extends Controller
         ActivityLog::create([
             'name' => auth()->user()->name ?? 'System',
             'ip_address' => $request->ip(),
-            'title' => 'Updated trekking: "' . $oldTitle . '" -> "' . $trekking->title . '"',
+            'title' => 'Updated trekking: "'.$oldTitle.'" -> "'.$trekking->title.'"',
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Trekking updated successfully',
-            'data' => $trekking->load('images', 'itineraries')
+            'data' => $trekking->load('images', 'itineraries'),
         ]);
     }
 
@@ -215,12 +225,12 @@ class TrekkingController extends Controller
         ActivityLog::create([
             'name' => auth()->user()->name ?? 'System',
             'ip_address' => request()->ip(),
-            'title' => 'Deleted trekking: ' . $trekkingTitle,
+            'title' => 'Deleted trekking: '.$trekkingTitle,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Trekking deleted successfully'
+            'message' => 'Trekking deleted successfully',
         ]);
     }
 }

@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-    X,
-    Plus,
-    Trash2,
-    ImagePlus,
-    ChevronDown,
-} from "lucide-react";
+import { X, Plus, Trash2, ImagePlus, ChevronDown } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
@@ -82,7 +76,7 @@ const EditToursForm = ({
                     day: i.day || idx + 1,
                     title: i.title || "",
                     description: i.description || "",
-                })) || []
+                })) || [],
             );
 
             setNewImages([]);
@@ -164,7 +158,7 @@ const EditToursForm = ({
                 .map((it, i) => ({
                     ...it,
                     day: i + 1,
-                }))
+                })),
         );
     };
 
@@ -176,8 +170,8 @@ const EditToursForm = ({
                           ...item,
                           [field]: value,
                       }
-                    : item
-            )
+                    : item,
+            ),
         );
     };
 
@@ -206,10 +200,7 @@ const EditToursForm = ({
         itineraries.forEach((item, i) => {
             formData.append(`itineraries[${i}][day]`, item.day);
             formData.append(`itineraries[${i}][title]`, item.title);
-            formData.append(
-                `itineraries[${i}][description]`,
-                item.description
-            );
+            formData.append(`itineraries[${i}][description]`, item.description);
         });
 
         try {
@@ -330,7 +321,7 @@ const EditToursForm = ({
                                                 >
                                                     {msg}
                                                 </li>
-                                            ))
+                                            )),
                                     )}
                                 </ul>
                             </div>
@@ -376,10 +367,7 @@ const EditToursForm = ({
                                         </option>
 
                                         {allCategory.map((cat) => (
-                                            <option
-                                                key={cat.id}
-                                                value={cat.id}
-                                            >
+                                            <option key={cat.id} value={cat.id}>
                                                 {cat.name}
                                             </option>
                                         ))}
@@ -406,7 +394,7 @@ const EditToursForm = ({
                                         onChange={(value) =>
                                             handleRichTextChange(
                                                 "description",
-                                                value
+                                                value,
                                             )
                                         }
                                         modules={quillModules}
@@ -429,7 +417,7 @@ const EditToursForm = ({
                                         onChange={(value) =>
                                             handleRichTextChange(
                                                 "includes",
-                                                value
+                                                value,
                                             )
                                         }
                                         modules={quillModules}
@@ -452,7 +440,7 @@ const EditToursForm = ({
                                         onChange={(value) =>
                                             handleRichTextChange(
                                                 "excludes",
-                                                value
+                                                value,
                                             )
                                         }
                                         modules={quillModules}
@@ -595,7 +583,7 @@ const EditToursForm = ({
                                                         handleItineraryChange(
                                                             index,
                                                             "title",
-                                                            e.target.value
+                                                            e.target.value,
                                                         )
                                                     }
                                                     required
@@ -614,7 +602,7 @@ const EditToursForm = ({
                                                     handleItineraryChange(
                                                         index,
                                                         "description",
-                                                        value
+                                                        value,
                                                     )
                                                 }
                                                 modules={quillModules}
@@ -625,6 +613,16 @@ const EditToursForm = ({
                                     </div>
                                 ))}
                             </div>
+                            {itineraries.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={addItinerary}
+                                    className="mt-4 w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 font-medium hover:border-indigo-300 hover:text-indigo-500 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus size={15} />
+                                    Add another itinerary item
+                                </button>
+                            )}
                         </section>
                     </form>
 

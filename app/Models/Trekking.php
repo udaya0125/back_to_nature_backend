@@ -47,4 +47,9 @@ class Trekking extends Model
     {
         return $this->hasMany(TrekkingItinerary::class);
     }
+
+    public function faqs()
+    {
+        return $this->hasMany(Faq::class);
+    }
 }
