@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', 'Back To Nature Adventure | Your Trusted Travel Partner') }}</title>
+         <link rel="icon" href='/images/logo.png'type='image/png'>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
