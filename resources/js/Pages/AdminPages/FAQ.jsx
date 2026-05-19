@@ -3,7 +3,7 @@ import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import EditFAQForm from "@/EditComponents/EditFAQForm";
 import MyTable from "@/MyTable/MyTable";
 import axios from "axios";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Edit } from "lucide-react";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 
 const FAQ = () => {
@@ -142,16 +142,16 @@ const FAQ = () => {
                         <button
                             type="button"
                             onClick={() => handleEdit(row.original)}
-                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                             title="Edit"
                         >
-                            <Pencil size={15} />
+                            <Edit size={15} />
                         </button>
                         <button
                             type="button"
                             onClick={() => handleDelete(row.original.id)}
                             disabled={deletingId === row.original.id}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40"
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                         >
                             <Trash2 size={15} />

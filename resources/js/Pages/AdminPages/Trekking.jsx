@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
-import { Plus, Pencil, Trash2, Mountain, ImageOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Mountain, ImageOff, Edit } from "lucide-react";
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import AddTrekkingForm from "@/AddComponents/AddTrekkingForm";
 import EditTrekkingForm from "@/EditComponents/EditTrekkingForm";
@@ -173,7 +173,7 @@ const Trekking = () => {
                             className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                             title="Edit"
                         >
-                            <Pencil size={15} />
+                            <Edit size={15} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}

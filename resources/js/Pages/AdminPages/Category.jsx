@@ -3,7 +3,7 @@ import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import EditCategoryForm from "@/EditComponents/EditCategoryForm";
 import MyTable from "@/MyTable/MyTable";
 import axios from "axios";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Edit, Pencil, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
 const Category = () => {
@@ -75,7 +75,7 @@ const Category = () => {
                             className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                             title="Edit"
                         >
-                            <Pencil size={16} />
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}

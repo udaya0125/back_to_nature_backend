@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
-import { Plus, ImageOff } from "lucide-react";
+import { Plus, ImageOff, Edit, Trash2 } from "lucide-react";
 import AddActivitiesForm from "@/AddComponents/AddActivitiesForm";
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import MyTable from "@/MyTable/MyTable";
@@ -158,15 +158,15 @@ const Activities = () => {
                     <div className="flex  gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition"
+                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                         >
-                            Edit
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         >
-                            Delete
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),

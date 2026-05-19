@@ -3,7 +3,7 @@ import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import EditSubCategoryForm from "@/EditComponents/EditSubCategoryForm";
 import MyTable from "@/MyTable/MyTable";
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Edit, Edit2, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 
 const SubCategory = () => {
@@ -117,15 +117,15 @@ const SubCategory = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition text-sm"
+                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                         >
-                            Edit
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm"
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
                         >
-                            Delete
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),

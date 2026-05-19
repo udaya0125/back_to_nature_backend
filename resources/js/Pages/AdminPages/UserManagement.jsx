@@ -209,14 +209,14 @@ const UserManagement = () => {
                     <div className="flex space-x-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="text-blue-600 hover:text-blue-900 transition-colors"
+                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                             title="Edit"
                         >
                             <Edit size={18} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="text-red-600 hover:text-red-900 transition-colors"
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                         >
                             <Trash2 size={18} />

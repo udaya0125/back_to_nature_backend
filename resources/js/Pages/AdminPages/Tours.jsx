@@ -1,7 +1,7 @@
 import AddToursForm from "@/AddComponents/AddToursForm";
 import AdminWrapper from "@/AdminComponents/AdminWrapper";
 import EditToursForm from "@/EditComponents/EditToursForm";
-import { Plus, Pencil, Trash2, ImageOff } from "lucide-react";
+import { Plus, Pencil, Trash2, ImageOff, Edit } from "lucide-react";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import MyTable from "@/MyTable/MyTable";
@@ -154,7 +154,7 @@ const Tours = () => {
                             className="p-1.5 rounded-lg text-indigo-500 hover:bg-indigo-50 transition-colors"
                             title="Edit"
                         >
-                            <Pencil size={15} />
+                            <Edit size={15} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
