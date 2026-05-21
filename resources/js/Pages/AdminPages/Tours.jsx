@@ -154,14 +154,14 @@ const Tours = () => {
                             className="p-1.5 rounded-lg text-indigo-500 hover:bg-indigo-50 transition-colors"
                             title="Edit"
                         >
-                            <Edit size={15} />
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
                             className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
                             title="Delete"
                         >
-                            <Trash2 size={15} />
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),

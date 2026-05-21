@@ -145,7 +145,7 @@ const FAQ = () => {
                             className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                             title="Edit"
                         >
-                            <Edit size={15} />
+                            <Edit size={16} />
                         </button>
                         <button
                             type="button"
@@ -154,7 +154,7 @@ const FAQ = () => {
                             className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                         >
-                            <Trash2 size={15} />
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),
